@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">System Information</string>
+    <string name="app_name">Eddy</string>
     <string name="get_information">Get Information</string>
     <string name="hard_soft_info">Hardware and Software Information</string>
     <string name="serial">SERIAL: </string>

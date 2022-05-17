@@ -13,7 +13,8 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
+import android.os.HandlerThread;
+import android.os.Looper;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,9 +35,7 @@ import java.util.Calendar;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
-    private static final String TAG = "MainActivity";
-
-    public final int DEFAULT_UPDATE_INTERVAL = 1;
+    public final int DEFAULT_UPDATE_INTERVAL = 2;
     public final int FAST_UPDATE_INTERVAL = 1;
     private final int PERMISSION_FINE_LOCATION = 99;
 
@@ -55,6 +54,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     Geocoder geocoder;
     LocationRequest locationRequest;
     LocationCallback locationCallBack;
+    Looper locationLooper;
     Sensor accelerometer;
 
     ArrayList<Float> arrayZvalues = new ArrayList<>();
@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
 
         if (fusedLocationProviderClient == null) updateGPS();
-        fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallBack, null);
+        fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallBack, locationLooper);
     }
 
     @Override
@@ -91,10 +91,18 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        HandlerThread locationThread = new HandlerThread("loc");
+        locationThread.start();
+        locationLooper = locationThread.getLooper();
+
+        SensorManager sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_FASTEST);
+
         geocoder = new Geocoder(this);
 
-        //GPS
-        //Give each UI variable a value
+        updateGPS();
+
         tv_lat = findViewById(R.id.tv_lat);
         tv_lon = findViewById(R.id.tv_lon);
         tv_altitude = findViewById(R.id.tv_altitude);
@@ -107,8 +115,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         aid = findViewById(R.id.aid);
         aversioncode = findViewById(R.id.aversioncode);
         abrand = findViewById(R.id.abrand);
+        time = findViewById(R.id.time);
 
-        //switch
         switchBtn = findViewById(R.id.switchBtn);
         switchBtn.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
@@ -120,11 +128,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 amanuf.setText(Build.MANUFACTURER);
                 amodel.setText(Build.MODEL);
             } else {
-                if (fusedLocationProviderClient != null) fusedLocationProviderClient.removeLocationUpdates(locationCallBack);
+                if (fusedLocationProviderClient != null)
+                    fusedLocationProviderClient.removeLocationUpdates(locationCallBack);
             }
         });
 
-        //set all properties of locationReq
         locationRequest = LocationRequest.create()
                 .setInterval(DEFAULT_UPDATE_INTERVAL)
                 .setFastestInterval(FAST_UPDATE_INTERVAL)
@@ -138,25 +146,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 if (switchBtn.isChecked()) updateUIValues(locationResult.getLastLocation());
             }
         };
-
-        updateGPS();
-        //GPS ENDS
-
-        //Accelerometer
-        Log.d(TAG, "onCreate: Initializing Sensor Services");
-        SensorManager sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_FASTEST);
-        Log.d(TAG, "onCreate: Registered Accelerometer listener");
-        //Date and time
-        time = findViewById(R.id.time);
     }
 
     @Override
-    public void onAccuracyChanged(Sensor sensor, int i) {
-    }
+    public void onAccuracyChanged(Sensor sensor, int i) { /* Unused */ }
 
-    //Z Axis Acceleration - Date and time
     @Override
     @SuppressLint("SimpleDateFormat")
     public void onSensorChanged(SensorEvent sensorEvent) {
@@ -190,10 +184,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == PERMISSION_FINE_LOCATION) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                //If premission is granted use the GPS
                 updateGPS();
             } else {
-                //if premission is not granted display the following message
                 Toast.makeText(this, "This app requires permission to be granted in order to work properly", Toast.LENGTH_SHORT).show();
                 finish();
             }
@@ -232,117 +224,107 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         } catch (Exception e) {
             tv_address.setText("Unable to get street address");
         }
-        //Display values in Logcat
-        // Log.d(TAG, "updateUIValues: LAT: " + location.getLatitude() + " LON:" + location.getLongitude() + " ALT: " + location.getAltitude() + " SPEED: " + location.getSpeed());
     }
 
-    //Store in Excel CSV file
-    // public void export(View view) {
+    /*
+    Store in Excel CSV file
+     public void export(View view) {
+         //generate data
+         StringBuilder data = new StringBuilder();
+         data.append("Date,Time,Z Acc, Z Acc filter,Latitude,Longitude,Altitude,Speed,Accuracy,Address,Serial,Model,ID,Manufacturer,Brand,Version code");
+         int i = 0;
+         String arrayDateFinal = arrayDate.get(i);
+         //for each index, take the value from the arrays
+         //For loop is currently not displaying the arrays correctly into the csv file
+         for (i = 0; i < arrayZvalues.size(); i++) {
+             data.append("\n").append(arrayDateFinal).append(",").append(arrayTime.get(i)).append(",").append(arrayZvalues.get(i)).append(',').append(z.get(i)).append(",").append(arrayLat.get(i)).append(",").append(arrayLon.get(i)).append(",").append(arrayAlt.get(i)).append(",").append(arraySpeed.get(i)).append(",").append(arrayAccuracy.get(i)).append(",").append("address").append(",").append(Build.SERIAL).append(",").append(Build.MODEL).append(",").append(Build.ID).append(",").append(Build.MANUFACTURER).append(",").append(Build.BRAND).append(",").append(Build.VERSION.RELEASE);
+         }
+         try {
+             //saving the file into device
+             FileOutputStream out = openFileOutput("data.csv", Context.MODE_PRIVATE);
+             out.write((data.toString()).getBytes());
+             out.close();
+             //exporting
+             Context context = getApplicationContext();
+             File filelocation = new File(getFilesDir(), "data.csv");
+             Uri path = FileProvider.getUriForFile(context, "com.example.Storage.fileprovider", filelocation);
+             Intent fileIntent = new Intent(Intent.ACTION_SEND);
+             fileIntent.setType("text/csv");
+             fileIntent.putExtra(Intent.EXTRA_SUBJECT, "Data");
+             fileIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+             fileIntent.putExtra(Intent.EXTRA_STREAM, path);
+             startActivity(Intent.createChooser(fileIntent, "Send mail"));
+         } catch (Exception e) {
+             e.printStackTrace();
+         }
+     }
+     public class filtering {
+         public void main(String[] args) {
+             //Low pass filter first section
+             //constants
+             b0 = 1;
+             b1 = 2;
+             b2 = 1;
+             a0 = 1;
+             a1 = -1.94921595802584;
+             a2 = 0.953069895327891;
+             //Build low pass filter first section
+             // y(n) = b0x(n) + b1x(n-1) + b2(x(n-2) - a1y(n-1) - a2y(n-2)
+             z.add(0, (double) (1 * arrayZvalues.get(0)) * 0.000963484325512291);
+             z.add(1, (b0 * arrayZvalues.get(1) + b1 * arrayZvalues.get(0) - a1 * arrayZvalues.get(0)) * 0.000963484325512291);
+             int i = 0;
+             for (i = 2; i < arrayZvalues.size(); i++) {
+                 data1 = (b0 * arrayZvalues.get(i) + b1 * arrayZvalues.get(i - 1) + b2 * arrayZvalues.get(i - 2) - (a1) * z.get(i - 1) - (a2) * z.get(i - 2));
+                 datagain = data1 * 0.000963484325512291;
+                 z.add(i, datagain);
+             }
+             //low pass filter second section
+             //constants
+             b01 = 1;
+             b11 = 2;
+             b21 = 1;
+             a01 = 1;
+             a11 = -1.88660958262151;
+             a21 = 0.890339736284024;
+             //Build low pass filter second section
+             x.add(0, b01 * z.get(0) * 0.000932538415629474);
+             x.add(1, b01 * z.get(1) + b11 * z.get(0) - a11 * z.get(0) * 0.000932538415629474);
+             for (i = 2; i < arrayZvalues.size(); i++) {
+                 data2 = ((b01 * z.get(i) + b11 * z.get(i - 1) + b21 * z.get(i - 2) - a11 * x.get(i - 1) - a21 * x.get(i - 2)));
+                 x.add(i, 0.000932538415629474 * data2);
+             }
+             //high pass filter first section
+             //constants
+             b02 = 1;
+             b12 = -2;
+             b22 = 1;
+             a02 = 1;
+             a12 = -1.999037095803727126;
+             a22 = 0.9990386741811910775;
+             //Build high pass filter first section
+             y.add(0, b02 * x.get(0) * 0.999518942496229523);
+             y.add(1, b02 * x.get(1) + b12 * x.get(0) - a12 * z.get(0) * 0.999518942496229523);
+             for (i = 2; i < arrayZvalues.size(); i++) {
+                 data3 = (b02 * x.get(i) + b12 * x.get(i - 1) + b22 * x.get(i - 2) - a12 * y.get(i - 1) - a22 * y.get(i - 2));
+                 y.add(i, 0.999518942496229523 * data3);
+             }
+             //high pass filter second section
+             //constants
+             b03 = 1;
+             b13 = -2;
+             b23 = 1;
+             a03 = 1;
+             a13 = -1.99767915341159740;
+             a23 = 0.997680730716872465;
+             //Build high pass filter second section
+             w.add(0, b03 * y.get(0) * 0.998839971032117524);
+             w.add(1, b03 * y.get(1) + b13 * y.get(0) - a13 * y.get(0) * 0.998839971032117524);
+             for (i = 2; i < arrayZvalues.size(); i++) {
+                 data4 = (b03 * y.get(i) + b13 * y.get(i - 1) + b23 * y.get(i - 2) - a13 * w.get(i - 1) - a23 * w.get(i - 2));
+                 w.add(i, 0.998839971032117524 * data4);
+             }
+         }
+     }
+    */
 
-    //     //generate data
-    //     StringBuilder data = new StringBuilder();
-    //     data.append("Date,Time,Z Acc, Z Acc filter,Latitude,Longitude,Altitude,Speed,Accuracy,Address,Serial,Model,ID,Manufacturer,Brand,Version code");
-    //     int i = 0;
-    //     String arrayDateFinal = arrayDate.get(i);
-    //     //for each index, take the value from the arrays
-    //     //For loop is currently not displaying the arrays correctly into the csv file
-    //     for (i = 0; i < arrayZvalues.size(); i++) {
-    //         data.append("\n").append(arrayDateFinal).append(",").append(arrayTime.get(i)).append(",").append(arrayZvalues.get(i)).append(',').append(z.get(i)).append(",").append(arrayLat.get(i)).append(",").append(arrayLon.get(i)).append(",").append(arrayAlt.get(i)).append(",").append(arraySpeed.get(i)).append(",").append(arrayAccuracy.get(i)).append(",").append("address").append(",").append(Build.SERIAL).append(",").append(Build.MODEL).append(",").append(Build.ID).append(",").append(Build.MANUFACTURER).append(",").append(Build.BRAND).append(",").append(Build.VERSION.RELEASE);
-    //     }
-
-    //     try {
-    //         //saving the file into device
-    //         FileOutputStream out = openFileOutput("data.csv", Context.MODE_PRIVATE);
-    //         out.write((data.toString()).getBytes());
-    //         out.close();
-
-    //         //exporting
-    //         Context context = getApplicationContext();
-    //         File filelocation = new File(getFilesDir(), "data.csv");
-    //         Uri path = FileProvider.getUriForFile(context, "com.example.Storage.fileprovider", filelocation);
-    //         Intent fileIntent = new Intent(Intent.ACTION_SEND);
-    //         fileIntent.setType("text/csv");
-    //         fileIntent.putExtra(Intent.EXTRA_SUBJECT, "Data");
-    //         fileIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-    //         fileIntent.putExtra(Intent.EXTRA_STREAM, path);
-    //         startActivity(Intent.createChooser(fileIntent, "Send mail"));
-    //     } catch (Exception e) {
-    //         e.printStackTrace();
-    //     }
-    // }
-
-    // public class filtering {
-    //     public void main(String[] args) {
-    //         //Low pass filter first section
-    //         //constants
-    //         b0 = 1;
-    //         b1 = 2;
-    //         b2 = 1;
-    //         a0 = 1;
-    //         a1 = -1.94921595802584;
-    //         a2 = 0.953069895327891;
-
-    //         //Build low pass filter first section
-    //         // y(n) = b0x(n) + b1x(n-1) + b2(x(n-2) - a1y(n-1) - a2y(n-2)
-    //         z.add(0, (double) (1 * arrayZvalues.get(0)) * 0.000963484325512291);
-    //         z.add(1, (b0 * arrayZvalues.get(1) + b1 * arrayZvalues.get(0) - a1 * arrayZvalues.get(0)) * 0.000963484325512291);
-    //         int i = 0;
-    //         for (i = 2; i < arrayZvalues.size(); i++) {
-    //             data1 = (b0 * arrayZvalues.get(i) + b1 * arrayZvalues.get(i - 1) + b2 * arrayZvalues.get(i - 2) - (a1) * z.get(i - 1) - (a2) * z.get(i - 2));
-    //             datagain = data1 * 0.000963484325512291;
-    //             z.add(i, datagain);
-    //         }
-
-    //         //low pass filter second section
-    //         //constants
-    //         b01 = 1;
-    //         b11 = 2;
-    //         b21 = 1;
-    //         a01 = 1;
-    //         a11 = -1.88660958262151;
-    //         a21 = 0.890339736284024;
-
-    //         //Build low pass filter second section
-    //         x.add(0, b01 * z.get(0) * 0.000932538415629474);
-    //         x.add(1, b01 * z.get(1) + b11 * z.get(0) - a11 * z.get(0) * 0.000932538415629474);
-    //         for (i = 2; i < arrayZvalues.size(); i++) {
-    //             data2 = ((b01 * z.get(i) + b11 * z.get(i - 1) + b21 * z.get(i - 2) - a11 * x.get(i - 1) - a21 * x.get(i - 2)));
-    //             x.add(i, 0.000932538415629474 * data2);
-    //         }
-
-    //         //high pass filter first section
-    //         //constants
-    //         b02 = 1;
-    //         b12 = -2;
-    //         b22 = 1;
-    //         a02 = 1;
-    //         a12 = -1.999037095803727126;
-    //         a22 = 0.9990386741811910775;
-
-    //         //Build high pass filter first section
-    //         y.add(0, b02 * x.get(0) * 0.999518942496229523);
-    //         y.add(1, b02 * x.get(1) + b12 * x.get(0) - a12 * z.get(0) * 0.999518942496229523);
-    //         for (i = 2; i < arrayZvalues.size(); i++) {
-    //             data3 = (b02 * x.get(i) + b12 * x.get(i - 1) + b22 * x.get(i - 2) - a12 * y.get(i - 1) - a22 * y.get(i - 2));
-    //             y.add(i, 0.999518942496229523 * data3);
-    //         }
-
-    //         //high pass filter second section
-    //         //constants
-    //         b03 = 1;
-    //         b13 = -2;
-    //         b23 = 1;
-    //         a03 = 1;
-    //         a13 = -1.99767915341159740;
-    //         a23 = 0.997680730716872465;
-
-    //         //Build high pass filter second section
-    //         w.add(0, b03 * y.get(0) * 0.998839971032117524);
-    //         w.add(1, b03 * y.get(1) + b13 * y.get(0) - a13 * y.get(0) * 0.998839971032117524);
-    //         for (i = 2; i < arrayZvalues.size(); i++) {
-    //             data4 = (b03 * y.get(i) + b13 * y.get(i - 1) + b23 * y.get(i - 2) - a13 * w.get(i - 1) - a23 * w.get(i - 2));
-    //             w.add(i, 0.998839971032117524 * data4);
-    //         }
-    //     }
-    // }
 }
