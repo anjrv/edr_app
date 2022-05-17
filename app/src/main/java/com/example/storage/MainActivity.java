@@ -15,6 +15,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.HandlerThread;
 import android.os.Looper;
+import android.view.View;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -224,6 +225,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         } catch (Exception e) {
             tv_address.setText("Unable to get street address");
         }
+    }
+
+    public void export(View view) {
+        // Gonna use for MQTT testing instead
     }
 
     /*
