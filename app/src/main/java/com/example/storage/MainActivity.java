@@ -10,7 +10,6 @@ import android.hardware.SensorManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
-import android.os.Process;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -38,7 +37,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding mBinding;
 
-    private volatile Location mCurrLoc;
+    private volatile Location mCurrLoc; // Should be sufficient for one write one read
     private AtomicInteger mCurrMeasurement = new AtomicInteger();
 
     private FusedLocationProviderClient mFusedLocationProviderClient;
@@ -63,13 +62,13 @@ public class MainActivity extends AppCompatActivity {
         locationThread.start();
         mLocationLooper = locationThread.getLooper();
 
-        SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        mAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
         new Thread(() -> {
             Looper.prepare();
             Handler sensorHandler = new Handler();
-            sensorManager.registerListener(mSensorEventListener, mAccelerometer, SensorManager.SENSOR_DELAY_FASTEST, sensorHandler);
+            mSensorManager.registerListener(mSensorEventListener, mAccelerometer, SensorManager.SENSOR_DELAY_FASTEST, sensorHandler);
             Looper.loop();
         }).start();
 
@@ -178,7 +177,7 @@ public class MainActivity extends AppCompatActivity {
         mBinding.tvAccuracy.setText(String.valueOf(m.getAccuracy()));
         mBinding.tvAltitude.setText(String.valueOf(m.getAltitude()));
         mBinding.tvSpeed.setText(String.valueOf(m.getSpeed()));
-        mBinding.time.setText(m.getDate() + m.getTime());
+        mBinding.time.setText(String.format("%s %s", m.getDate(), m.getTime()));
 
         try {
             List<Address> addresses = mGeocoder.getFromLocation(m.getLatitude(), m.getLongitude(), 1);

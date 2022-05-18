@@ -3,5 +3,7 @@ package com.example.storage;
 import java.util.ArrayList;
 
 public class Measurements {
-    public static volatile ArrayList<Measurement> sData = new ArrayList<>();
+    // Not explicitly thread safe but we are currently only adding
+    // UI reads can be relatively delayed without too much issue
+    public static ArrayList<Measurement> sData = new ArrayList<>();
 }
