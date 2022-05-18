@@ -1,0 +1,1442 @@
+!SESSION 2022-05-18 11:31:26.611 -----------------------------------------------
+eclipse.buildId=unknown
+java.version=18.0.1.1
+java.vendor=N/A
+BootLoader constants: OS=linux, ARCH=x86_64, WS=gtk, NL=en_US
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:27.327
+!MESSAGE class org.eclipse.jdt.ls.core.internal.JavaLanguageServerPlugin is started
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:27.431
+!MESSAGE Main thread is waiting
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:27.453
+!MESSAGE >> initialize
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:27.454
+!MESSAGE Initializing Java Language Server 1.11.0.202205051421
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:27.460
+!MESSAGE Static Commands: []
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:27.460
+!MESSAGE Non-Static Commands: [java.edit.organizeImports, java.project.refreshDiagnostics, java.project.import, java.navigate.openTypeHierarchy, java.project.removeFromSourcePath, java.project.listSourcePaths, java.project.resolveStackTraceLocation, java.project.getAll, java.project.isTestFile, java.project.getClasspaths, java.navigate.resolveTypeHierarchy, java.edit.stringFormatting, java.project.getSettings, java.project.updateSourceAttachment, java.project.resolveWorkspaceSymbol, java.project.upgradeGradle, java.project.resolveSourceAttachment, java.project.addToSourcePath]
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:27.462
+!MESSAGE Wait for AutoBuildOffJob start
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:27.462
+!MESSAGE Wait for AutoBuildOffJob end 0ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:27.462
+!MESSAGE Starting org.eclipse.m2e.core
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:27.463
+!MESSAGE Started org.eclipse.m2e.core 1ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:27.463
+!MESSAGE ProjectRegistryRefreshJob finished 0ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:27.463
+!MESSAGE Starting org.eclipse.buildship.core
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:27.471
+!MESSAGE Started org.eclipse.buildship.core 8ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:27.948
+!MESSAGE LoadingGradleVersionJob finished 477ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:27.957
+!MESSAGE >> initialized
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:27.958
+!MESSAGE Creating the Java project jdt.ls-java-project
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:28.000
+!MESSAGE Finished creating the Java project jdt.ls-java-project
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:28.217
+!MESSAGE Importing Gradle project(s)
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:28.218
+!MESSAGE No previous Gradle project at /home/anjrv/Projects/edr_app, it must be synchronized
+
+!ENTRY org.eclipse.buildship.core 2 1 2022-05-18 11:31:28.665
+!MESSAGE Synchronize project edr_app failed due to an error while importing the root project.
+!STACK 0
+org.eclipse.buildship.core.internal.ImportRootProjectException: org.eclipse.buildship.core.internal.GradlePluginsRuntimeException: org.eclipse.core.internal.resources.ResourceException: Invalid project description.
+	at org.eclipse.buildship.core.internal.workspace.ImportRootProjectOperation.run(ImportRootProjectOperation.java:53)
+	at org.eclipse.buildship.core.internal.DefaultGradleBuild$SynchronizeOperation.runInToolingApi(DefaultGradleBuild.java:225)
+	at org.eclipse.buildship.core.internal.operation.DefaultToolingApiOperationManager$WorkspaceRunnableAdapter.run(DefaultToolingApiOperationManager.java:58)
+	at org.eclipse.core.internal.resources.Workspace.run(Workspace.java:2315)
+	at org.eclipse.core.internal.resources.Workspace.run(Workspace.java:2340)
+	at org.eclipse.buildship.core.internal.operation.DefaultToolingApiOperationManager.run(DefaultToolingApiOperationManager.java:39)
+	at org.eclipse.buildship.core.internal.DefaultGradleBuild$SynchronizeOperation.run(DefaultGradleBuild.java:192)
+	at org.eclipse.buildship.core.internal.DefaultGradleBuild.synchronize(DefaultGradleBuild.java:100)
+	at org.eclipse.buildship.core.internal.DefaultGradleBuild.synchronize(DefaultGradleBuild.java:86)
+	at org.eclipse.jdt.ls.core.internal.managers.GradleProjectImporter.startSynchronization(GradleProjectImporter.java:352)
+	at org.eclipse.jdt.ls.core.internal.managers.GradleProjectImporter.importDir(GradleProjectImporter.java:240)
+	at org.eclipse.jdt.ls.core.internal.managers.GradleProjectImporter.importToWorkspace(GradleProjectImporter.java:191)
+	at org.eclipse.jdt.ls.core.internal.managers.ProjectsManager.importProjects(ProjectsManager.java:148)
+	at org.eclipse.jdt.ls.core.internal.managers.ProjectsManager.initializeProjects(ProjectsManager.java:110)
+	at org.eclipse.jdt.ls.core.internal.handlers.InitHandler$1.runInWorkspace(InitHandler.java:244)
+	at org.eclipse.core.internal.resources.InternalWorkspaceJob.run(InternalWorkspaceJob.java:42)
+	at org.eclipse.core.internal.jobs.Worker.run(Worker.java:63)
+Caused by: org.eclipse.buildship.core.internal.GradlePluginsRuntimeException: org.eclipse.core.internal.resources.ResourceException: Invalid project description.
+	at org.eclipse.buildship.core.internal.workspace.DefaultWorkspaceOperations.createProject(DefaultWorkspaceOperations.java:128)
+	at org.eclipse.buildship.core.internal.workspace.ImportRootProjectOperation.importRootProject(ImportRootProjectOperation.java:95)
+	at org.eclipse.buildship.core.internal.workspace.ImportRootProjectOperation.access$200(ImportRootProjectOperation.java:39)
+	at org.eclipse.buildship.core.internal.workspace.ImportRootProjectOperation$1.run(ImportRootProjectOperation.java:68)
+	at org.eclipse.core.internal.resources.Workspace.run(Workspace.java:2315)
+	at org.eclipse.core.internal.resources.Workspace.run(Workspace.java:2335)
+	at org.eclipse.buildship.core.internal.workspace.ImportRootProjectOperation.runInWorkspace(ImportRootProjectOperation.java:58)
+	at org.eclipse.buildship.core.internal.workspace.ImportRootProjectOperation.run(ImportRootProjectOperation.java:51)
+	... 16 more
+Caused by: org.eclipse.core.internal.resources.ResourceException: Invalid project description.
+	at org.eclipse.core.internal.resources.Project.checkDescription(Project.java:174)
+	at org.eclipse.core.internal.resources.Project.assertCreateRequirements(Project.java:58)
+	at org.eclipse.core.internal.resources.Project.create(Project.java:268)
+	at org.eclipse.core.internal.resources.Project.create(Project.java:254)
+	at org.eclipse.buildship.core.internal.workspace.DefaultWorkspaceOperations.createProject(DefaultWorkspaceOperations.java:113)
+	... 23 more
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:28.985
+!MESSAGE Workspace initialized in 1036ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:29.009
+!MESSAGE >> initialization job finished
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:29.010
+!MESSAGE >> document/didOpen
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:29.080
+!MESSAGE >> build jobs finished
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:29.081
+!MESSAGE >> registerWatchers'
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:29.081
+!MESSAGE >> watchers registered
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:29.568
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:29.921
+!MESSAGE >> document/codeAction
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:30.101
+!MESSAGE begin problem for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:30.101
+!MESSAGE 2 problems reported for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:30.102
+!MESSAGE Validated 1. Took 83 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:40.594
+!MESSAGE >> document/codeAction
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:40.803
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:40.807
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:41.253
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:41.256
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:41.402
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:41.405
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:41.659
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:41.661
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:41.822
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:41.824
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:41.984
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:41.986
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:42.147
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:42.149
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:42.520
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:42.522
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:42.943
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:42.945
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:43.333
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:43.335
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:43.788
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:43.805
+!MESSAGE begin problem for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:43.805
+!MESSAGE 4 problems reported for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:43.805
+!MESSAGE Validated 1. Took 19 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:43.807
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:43.999
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:44.001
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:44.148
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:44.150
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:44.297
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:44.299
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:44.447
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:44.449
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:44.597
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:44.599
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:44.747
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:44.749
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:45.167
+!MESSAGE begin problem for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:45.167
+!MESSAGE 3 problems reported for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:45.167
+!MESSAGE Validated 1. Took 16 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:45.921
+!MESSAGE >> document/codeAction
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:52.806
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:52.807
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:53.221
+!MESSAGE begin problem for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:53.221
+!MESSAGE 9 problems reported for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:53.222
+!MESSAGE Validated 1. Took 14 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:54.770
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:54.771
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:54.920
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:54.921
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:55.070
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:55.071
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:55.221
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:55.222
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:55.371
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:55.372
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:55.569
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:55.570
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:56.031
+!MESSAGE begin problem for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:56.031
+!MESSAGE 9 problems reported for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:56.031
+!MESSAGE Validated 1. Took 10 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:56.961
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:56.962
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:57.110
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:57.111
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:57.523
+!MESSAGE begin problem for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:57.523
+!MESSAGE 9 problems reported for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:57.524
+!MESSAGE Validated 1. Took 12 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:57.916
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:57.917
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:58.067
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:58.068
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:58.217
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:58.218
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:58.366
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:58.367
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:58.778
+!MESSAGE begin problem for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:58.778
+!MESSAGE 9 problems reported for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:58.778
+!MESSAGE Validated 1. Took 10 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:59.893
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:31:59.895
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:00.307
+!MESSAGE begin problem for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:00.307
+!MESSAGE 8 problems reported for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:00.308
+!MESSAGE Validated 1. Took 13 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:00.412
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:00.414
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:00.835
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:00.837
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:01.192
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:01.194
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:01.469
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:01.471
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:01.874
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:01.876
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:02.338
+!MESSAGE begin problem for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:02.338
+!MESSAGE 3 problems reported for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:02.338
+!MESSAGE Validated 1. Took 12 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:02.571
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:02.573
+!MESSAGE Reconciled 1. Took 2 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:02.863
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:02.864
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:03.325
+!MESSAGE begin problem for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:03.325
+!MESSAGE 1 problems reported for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:03.325
+!MESSAGE Validated 1. Took 10 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:06.161
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:06.163
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:06.535
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:06.536
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:06.746
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:06.747
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:07.207
+!MESSAGE begin problem for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:07.208
+!MESSAGE 1 problems reported for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:07.208
+!MESSAGE Validated 1. Took 10 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:08.074
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:08.076
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:08.478
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:08.480
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:08.722
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:08.723
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:09.182
+!MESSAGE begin problem for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:09.182
+!MESSAGE 1 problems reported for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:09.183
+!MESSAGE Validated 1. Took 10 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:09.824
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:09.826
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:10.286
+!MESSAGE begin problem for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:10.286
+!MESSAGE 2 problems reported for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:10.286
+!MESSAGE Validated 1. Took 10 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:10.392
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:10.393
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:10.852
+!MESSAGE begin problem for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:10.852
+!MESSAGE 1 problems reported for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:10.852
+!MESSAGE Validated 1. Took 9 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:11.428
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:11.429
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:11.888
+!MESSAGE begin problem for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:11.888
+!MESSAGE 2 problems reported for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:11.889
+!MESSAGE Validated 1. Took 10 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:11.932
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:11.933
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:12.391
+!MESSAGE begin problem for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:12.391
+!MESSAGE 1 problems reported for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:12.391
+!MESSAGE Validated 1. Took 7 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:12.662
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:12.664
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:13.098
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:13.100
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:13.556
+!MESSAGE begin problem for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:13.556
+!MESSAGE 1 problems reported for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:13.563
+!MESSAGE Validated 1. Took 14 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:14.774
+!MESSAGE >> document/codeAction
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:15.373
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:15.374
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:15.782
+!MESSAGE begin problem for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:15.782
+!MESSAGE 2 problems reported for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:15.783
+!MESSAGE Validated 1. Took 8 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:16.022
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:16.023
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:16.480
+!MESSAGE begin problem for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:16.480
+!MESSAGE 1 problems reported for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:16.481
+!MESSAGE Validated 1. Took 7 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:17.290
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:17.292
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:17.748
+!MESSAGE begin problem for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:17.748
+!MESSAGE 2 problems reported for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:17.748
+!MESSAGE Validated 1. Took 7 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:18.067
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:18.068
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:18.525
+!MESSAGE begin problem for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:18.525
+!MESSAGE 1 problems reported for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:18.525
+!MESSAGE Validated 1. Took 6 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:19.283
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:19.285
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:19.747
+!MESSAGE begin problem for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:19.747
+!MESSAGE 2 problems reported for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:19.747
+!MESSAGE Validated 1. Took 7 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:19.755
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:19.756
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:20.215
+!MESSAGE begin problem for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:20.216
+!MESSAGE The value of the field Measurement.arrayZvalues is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:20.216
+!MESSAGE The value of the field Measurement.arrayTime is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:20.216
+!MESSAGE The value of the field Measurement.arrayDate is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:20.216
+!MESSAGE The value of the field Measurement.arrayLon is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:20.217
+!MESSAGE The value of the field Measurement.arrayLat is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:20.217
+!MESSAGE The value of the field Measurement.arrayAlt is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:20.217
+!MESSAGE The value of the field Measurement.arraySpeed is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:20.217
+!MESSAGE The value of the field Measurement.arrayAccuracy is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:20.217
+!MESSAGE 9 problems reported for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:20.217
+!MESSAGE Validated 1. Took 10 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:20.976
+!MESSAGE >> document/codeAction
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:26.538
+!MESSAGE >> document/codeAction
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:26.546
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:26.547
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.core 4 969 2022-05-18 11:32:26.547
+!MESSAGE arrayZvalues {key=Lcom/example/storage/Measurement;.arrayZvalues)Ljava/lang/Float;} [in Measurement [in [Working copy] Measurement.java [in com.example.storage [in src [in jdt.ls-java-project]]]]] does not exist
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:26.968
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:26.969
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:27.148
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:27.149
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:27.342
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:27.344
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:27.537
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:27.538
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:27.732
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:27.734
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:27.927
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:27.928
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:28.138
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:28.140
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:28.350
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:28.351
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:28.546
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:28.547
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:28.755
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:28.756
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:29.048
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:29.049
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:29.506
+!MESSAGE begin problem for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:29.506
+!MESSAGE 3 problems reported for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:29.506
+!MESSAGE Validated 1. Took 7 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:29.906
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:29.907
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:30.329
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:30.330
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:30.507
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:30.508
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:30.656
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:30.657
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:30.805
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:30.806
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:31.261
+!MESSAGE begin problem for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:31.261
+!MESSAGE The value of the field Measurement.zValue is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:31.262
+!MESSAGE The value of the field Measurement.arrayTime is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:31.262
+!MESSAGE The value of the field Measurement.arrayDate is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:31.262
+!MESSAGE The value of the field Measurement.arrayLon is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:31.262
+!MESSAGE The value of the field Measurement.arrayLat is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:31.262
+!MESSAGE The value of the field Measurement.arrayAlt is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:31.262
+!MESSAGE The value of the field Measurement.arraySpeed is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:31.262
+!MESSAGE The value of the field Measurement.arrayAccuracy is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:31.262
+!MESSAGE 9 problems reported for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:31.263
+!MESSAGE Validated 1. Took 7 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:32.015
+!MESSAGE >> document/codeAction
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:34.014
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:34.015
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:34.322
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:34.323
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:34.471
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:34.472
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:34.620
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:34.621
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:35.076
+!MESSAGE begin problem for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:35.076
+!MESSAGE The value of the field Measurement.zValue is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:35.077
+!MESSAGE The value of the field Measurement.time is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:35.077
+!MESSAGE The value of the field Measurement.arrayDate is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:35.077
+!MESSAGE The value of the field Measurement.arrayLon is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:35.077
+!MESSAGE The value of the field Measurement.arrayLat is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:35.077
+!MESSAGE The value of the field Measurement.arrayAlt is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:35.077
+!MESSAGE The value of the field Measurement.arraySpeed is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:35.077
+!MESSAGE The value of the field Measurement.arrayAccuracy is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:35.077
+!MESSAGE 9 problems reported for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:35.077
+!MESSAGE Validated 1. Took 6 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:35.960
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:35.962
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:36.173
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:36.174
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:36.321
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:36.322
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:36.470
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:36.471
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:36.927
+!MESSAGE begin problem for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:36.927
+!MESSAGE The value of the field Measurement.zValue is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:36.927
+!MESSAGE The value of the field Measurement.time is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:36.927
+!MESSAGE The value of the field Measurement.date is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:36.927
+!MESSAGE The value of the field Measurement.arrayLon is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:36.927
+!MESSAGE The value of the field Measurement.arrayLat is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:36.927
+!MESSAGE The value of the field Measurement.arrayAlt is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:36.927
+!MESSAGE The value of the field Measurement.arraySpeed is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:36.927
+!MESSAGE The value of the field Measurement.arrayAccuracy is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:36.927
+!MESSAGE 9 problems reported for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:36.928
+!MESSAGE Validated 1. Took 7 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:37.566
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:37.567
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:38.023
+!MESSAGE begin problem for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:38.023
+!MESSAGE 3 problems reported for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:38.023
+!MESSAGE Validated 1. Took 6 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:38.427
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:38.428
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:38.590
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:38.591
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:38.739
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:38.740
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:39.196
+!MESSAGE begin problem for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:39.196
+!MESSAGE 2 problems reported for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:39.196
+!MESSAGE Validated 1. Took 6 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:39.433
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:39.435
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:39.610
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:39.611
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:39.759
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:39.760
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:39.908
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:39.909
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:40.364
+!MESSAGE begin problem for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:40.364
+!MESSAGE The value of the field Measurement.zValue is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:40.365
+!MESSAGE The value of the field Measurement.time is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:40.365
+!MESSAGE The value of the field Measurement.date is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:40.365
+!MESSAGE The value of the field Measurement.longitude is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:40.365
+!MESSAGE The value of the field Measurement.arrayLat is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:40.365
+!MESSAGE The value of the field Measurement.arrayAlt is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:40.365
+!MESSAGE The value of the field Measurement.arraySpeed is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:40.365
+!MESSAGE The value of the field Measurement.arrayAccuracy is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:40.365
+!MESSAGE 9 problems reported for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:40.365
+!MESSAGE Validated 1. Took 6 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:42.064
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:42.065
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:42.323
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:42.324
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:42.472
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:42.473
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:42.621
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:42.622
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:42.771
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:42.772
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:42.921
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:42.922
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:43.070
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:43.071
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:43.526
+!MESSAGE begin problem for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:43.526
+!MESSAGE The value of the field Measurement.zValue is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:43.526
+!MESSAGE The value of the field Measurement.time is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:43.526
+!MESSAGE The value of the field Measurement.date is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:43.526
+!MESSAGE The value of the field Measurement.longitude is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:43.526
+!MESSAGE The value of the field Measurement.latitude is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:43.526
+!MESSAGE The value of the field Measurement.arrayAlt is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:43.527
+!MESSAGE The value of the field Measurement.arraySpeed is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:43.527
+!MESSAGE The value of the field Measurement.arrayAccuracy is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:43.527
+!MESSAGE 9 problems reported for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:43.527
+!MESSAGE Validated 1. Took 6 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:45.191
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:45.192
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:45.603
+!MESSAGE begin problem for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:45.603
+!MESSAGE 3 problems reported for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:45.603
+!MESSAGE Validated 1. Took 5 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:46.356
+!MESSAGE >> document/codeAction
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:46.440
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:46.441
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:46.846
+!MESSAGE begin problem for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:46.846
+!MESSAGE The value of the field Measurement.zValue is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:46.846
+!MESSAGE The value of the field Measurement.time is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:46.846
+!MESSAGE The value of the field Measurement.date is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:46.846
+!MESSAGE The value of the field Measurement.longitude is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:46.846
+!MESSAGE The value of the field Measurement.latitude is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:46.846
+!MESSAGE The value of the field Measurement.arrayAlt is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:46.846
+!MESSAGE The value of the field Measurement.arraySpeed is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:46.846
+!MESSAGE The value of the field Measurement.arrayAccuracy is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:46.847
+!MESSAGE 9 problems reported for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:46.847
+!MESSAGE Validated 1. Took 6 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:47.556
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:47.557
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:48.014
+!MESSAGE begin problem for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:48.014
+!MESSAGE 3 problems reported for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:48.014
+!MESSAGE Validated 1. Took 6 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:48.027
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:48.028
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:48.177
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:48.178
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:48.326
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:48.327
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:48.476
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:48.477
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:48.626
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:48.627
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:48.776
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:48.777
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:49.233
+!MESSAGE begin problem for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:49.233
+!MESSAGE The value of the field Measurement.zValue is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:49.233
+!MESSAGE The value of the field Measurement.time is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:49.233
+!MESSAGE The value of the field Measurement.date is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:49.233
+!MESSAGE The value of the field Measurement.longitude is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:49.233
+!MESSAGE The value of the field Measurement.latitude is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:49.233
+!MESSAGE The value of the field Measurement.altitude is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:49.233
+!MESSAGE The value of the field Measurement.arraySpeed is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:49.234
+!MESSAGE The value of the field Measurement.arrayAccuracy is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:49.234
+!MESSAGE 9 problems reported for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:49.234
+!MESSAGE Validated 1. Took 7 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:50.561
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:50.562
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:50.788
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:50.789
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:50.938
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:50.939
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:51.089
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:51.089
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:51.239
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:51.239
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:51.694
+!MESSAGE begin problem for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:51.695
+!MESSAGE The value of the field Measurement.zValue is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:51.695
+!MESSAGE The value of the field Measurement.time is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:51.695
+!MESSAGE The value of the field Measurement.date is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:51.695
+!MESSAGE The value of the field Measurement.longitude is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:51.695
+!MESSAGE The value of the field Measurement.latitude is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:51.695
+!MESSAGE The value of the field Measurement.altitude is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:51.695
+!MESSAGE The value of the field Measurement.speed is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:51.695
+!MESSAGE The value of the field Measurement.arrayAccuracy is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:51.695
+!MESSAGE 9 problems reported for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:51.695
+!MESSAGE Validated 1. Took 5 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:52.346
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:52.348
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:52.557
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:52.558
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:52.708
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:52.708
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:52.857
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:52.858
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:53.008
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:53.008
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:53.157
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:53.158
+!MESSAGE Reconciled 1. Took 1 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:53.307
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:53.308
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:53.456
+!MESSAGE >> document/didChange
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:53.457
+!MESSAGE Reconciled 1. Took 0 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:53.912
+!MESSAGE begin problem for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:53.912
+!MESSAGE The value of the field Measurement.zValue is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:53.912
+!MESSAGE The value of the field Measurement.time is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:53.913
+!MESSAGE The value of the field Measurement.date is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:53.913
+!MESSAGE The value of the field Measurement.longitude is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:53.913
+!MESSAGE The value of the field Measurement.latitude is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:53.913
+!MESSAGE The value of the field Measurement.altitude is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:53.913
+!MESSAGE The value of the field Measurement.speed is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:53.913
+!MESSAGE The value of the field Measurement.accuracy is not used is of type UnusedPrivateField
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:53.913
+!MESSAGE 9 problems reported for /Measurement.java
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:53.913
+!MESSAGE Validated 1. Took 5 ms
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:54.359
+!MESSAGE >> document/didSave
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:32:55.112
+!MESSAGE >> document/codeAction
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:33:02.919
+!MESSAGE >> document/codeAction
+
+!ENTRY org.eclipse.jdt.ls.core 1 0 2022-05-18 11:33:03.434
+!MESSAGE >> shutdown
