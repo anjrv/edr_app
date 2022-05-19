@@ -213,8 +213,7 @@ public class MainActivity extends AppCompatActivity {
     };
 
     public void export(View view) {
-        System.out.println(Measurements.sData.size());
-        // Gonna use for MQTT testing instead
+        Toast.makeText(this, String.valueOf(mCurrMeasurement.get()), Toast.LENGTH_SHORT).show();
     }
 
     /*
