@@ -33,6 +33,7 @@ import com.google.android.gms.location.LocationServices;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Executors;
@@ -188,11 +189,10 @@ public class MainActivity extends AppCompatActivity {
                     .requestLocationUpdates(mLocationRequest, mLocationCallback, mLocationLooper);
     }
 
-
-
     /**
      * Helper function to update on screen information with recent...ish values
      */
+    @SuppressLint("SimpleDateFormat")
     private void updateUI(Measurement m) {
         mBinding.zValue.setText((String.valueOf(m.getzValue())));
         mBinding.tvLat.setText(String.valueOf(m.getLatitude()));
@@ -200,8 +200,9 @@ public class MainActivity extends AppCompatActivity {
         mBinding.tvAccuracy.setText(String.valueOf(m.getAccuracy()));
         mBinding.tvAltitude.setText(String.valueOf(m.getAltitude()));
         mBinding.tvSpeed.setText(String.valueOf(m.getSpeed()));
-        mBinding.time.setText(new SimpleDateFormat("dd MMM yyyy HH:mm").
-                format(new Date(m.getTime())));
+        mBinding.time
+                .setText(new SimpleDateFormat("dd MMM yyyy HH:mm")
+                .format(new Date(m.getTime())));
     }
 
     /**
@@ -248,7 +249,7 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Currently used as a debug test function
      *
-     * @param view
+     * @param view the calling view
      */
     public void export(View view) {
         Toast.makeText(this, String.valueOf(mCurrMeasurement.get()), Toast.LENGTH_SHORT).show();
