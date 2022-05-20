@@ -2,13 +2,13 @@ package com.example.storage;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
@@ -16,6 +16,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -30,23 +31,26 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding mBinding;
 
-    private volatile Location mCurrLoc; // Should be sufficient for one write one read
     private AtomicInteger mCurrMeasurement = new AtomicInteger();
+    private final Semaphore mLocSemaphore = new Semaphore(1, true);
+    private Location mCurrLoc; // Sensor and Location threads both need to use this
 
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private LocationRequest mLocationRequest;
     private LocationCallback mLocationCallback;
-
     private Looper mLocationLooper;
-
-    private Geocoder mGeocoder;
 
     private SensorManager mSensorManager;
     private Sensor mAccelerometer;
@@ -58,23 +62,45 @@ public class MainActivity extends AppCompatActivity {
         View view = mBinding.getRoot();
         setContentView(view);
 
-        HandlerThread locationThread = new HandlerThread("loc");
-        locationThread.start();
-        mLocationLooper = locationThread.getLooper();
-
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
+        // Thread looper to be used for accelerometer callbacks
         new Thread(() -> {
             Looper.prepare();
             Handler sensorHandler = new Handler();
-            mSensorManager.registerListener(mSensorEventListener, mAccelerometer, SensorManager.SENSOR_DELAY_FASTEST, sensorHandler);
+            mSensorManager
+                    .registerListener(mSensorEventListener, mAccelerometer, SensorManager.SENSOR_DELAY_FASTEST, sensorHandler);
             Looper.loop();
         }).start();
 
-        mGeocoder = new Geocoder(this);
-
+        // Thread looper to be used for location callbacks
+        HandlerThread locationThread = new HandlerThread("loc");
+        locationThread.start();
+        mLocationLooper = locationThread.getLooper();
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+
+        mLocationRequest = LocationRequest.create()
+                .setInterval(1000)
+                .setFastestInterval(500)
+                .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY)
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+        mLocationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(@NonNull LocationResult locationResult) {
+                super.onLocationResult(locationResult);
+                if (mBinding.switchBtn.isChecked()) {
+                    try {
+                        mLocSemaphore.acquire();
+                        mCurrLoc = locationResult.getLastLocation();
+                        mLocSemaphore.release();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        };
 
         mBinding.switchBtn.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
@@ -91,34 +117,26 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        mLocationRequest = LocationRequest.create()
-                .setInterval(2)
-                .setFastestInterval(2)
-                .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY)
-                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-
-        mLocationCallback = new LocationCallback() {
-            @Override
-            public void onLocationResult(@NonNull LocationResult locationResult) {
-                super.onLocationResult(locationResult);
-                if (mBinding.switchBtn.isChecked()) mCurrLoc = locationResult.getLastLocation();
-            }
-        };
+        int approxRefresh = (int) (1000 / ((WindowManager) getSystemService(Context.WINDOW_SERVICE))
+                .getDefaultDisplay()
+                .getRefreshRate());
 
         new Thread(() -> {
             while (true) {
                 try {
-                    Thread.sleep(16);
+                    Thread.sleep(approxRefresh);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
 
-                runOnUiThread(() -> {
-                    int idx = mCurrMeasurement.get();
-                    if (idx > 0) {
-                        updateUI(Measurements.sData.get(idx - 1));
-                    }
-                });
+                if (mBinding.switchBtn.isChecked()) {
+                    runOnUiThread(() -> {
+                        int idx = mCurrMeasurement.get();
+                        if (idx > 0) {
+                            updateUI(Measurements.sData.get(idx - 1));
+                        }
+                    });
+                }
             }
         }).start();
     }
@@ -127,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
 
-        if (mSensorManager != null )
+        if (mSensorManager != null)
             mSensorManager.unregisterListener(mSensorEventListener);
 
         if (mFusedLocationProviderClient != null)
@@ -139,7 +157,8 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
 
         if (mSensorManager != null)
-            mSensorManager.registerListener(mSensorEventListener, mAccelerometer, SensorManager.SENSOR_DELAY_FASTEST);
+            mSensorManager
+                    .registerListener(mSensorEventListener, mAccelerometer, SensorManager.SENSOR_DELAY_FASTEST);
 
         startLocationUpdates();
     }
@@ -158,18 +177,22 @@ public class MainActivity extends AppCompatActivity {
 
     private void startLocationUpdates() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
-        {
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
 
         if (mFusedLocationProviderClient == null)
             mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         else
-            mFusedLocationProviderClient.requestLocationUpdates(mLocationRequest, mLocationCallback, mLocationLooper);
+            mFusedLocationProviderClient
+                    .requestLocationUpdates(mLocationRequest, mLocationCallback, mLocationLooper);
     }
 
-    @SuppressLint("SetTextI18n")
+
+
+    /**
+     * Helper function to update on screen information with recent...ish values
+     */
     private void updateUI(Measurement m) {
         mBinding.zValue.setText((String.valueOf(m.getzValue())));
         mBinding.tvLat.setText(String.valueOf(m.getLatitude()));
@@ -177,41 +200,56 @@ public class MainActivity extends AppCompatActivity {
         mBinding.tvAccuracy.setText(String.valueOf(m.getAccuracy()));
         mBinding.tvAltitude.setText(String.valueOf(m.getAltitude()));
         mBinding.tvSpeed.setText(String.valueOf(m.getSpeed()));
-        mBinding.time.setText(String.format("%s %s", m.getDate(), m.getTime()));
-
-        try {
-            List<Address> addresses = mGeocoder.getFromLocation(m.getLatitude(), m.getLongitude(), 1);
-            mBinding.tvAddress.setText(addresses.get(0).getAddressLine(0));
-        } catch (Exception e) {
-            mBinding.tvAddress.setText("Unable to get street address");
-        }
+        mBinding.time.setText(new SimpleDateFormat("dd MMM yyyy HH:mm").
+                format(new Date(m.getTime())));
     }
 
+    /**
+     * Listener for accelerometer events
+     *
+     * Obtains most recent location and creates a new measurement entry
+     * Updates most recent measurement number for UI refresh function to use
+     */
     private final SensorEventListener mSensorEventListener = new SensorEventListener() {
         @Override
         @SuppressLint("SimpleDateFormat")
         public void onSensorChanged(SensorEvent event) {
-            if (mBinding.switchBtn.isChecked() && mCurrLoc != null && event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-                Calendar calendar = Calendar.getInstance();
-                SimpleDateFormat simpleDatesFormat = new SimpleDateFormat("dd-MM-yyyy");
-                SimpleDateFormat simpleTimeFormat = new SimpleDateFormat("hh:mm:ss ");
-                String date = simpleDatesFormat.format(calendar.getTime());
-                String time = simpleTimeFormat.format(calendar.getTime());
+            if (mBinding.switchBtn.isChecked() && event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
                 Float zAcc = event.values[2];
+                long time = System.currentTimeMillis();
 
-                Measurement m = new Measurement(
-                    zAcc, time, date, mCurrLoc.getLongitude(), mCurrLoc.getLatitude(), mCurrLoc.getAltitude(), mCurrLoc.getSpeed(), mCurrLoc.getAccuracy()
-                );
+                try {
+                    Measurement m = null;
+                    mLocSemaphore.acquire();
 
-                Measurements.sData.add(m);
-                mCurrMeasurement.set(Measurements.sData.size());
+                    if (mCurrLoc != null) {
+                        m = new Measurement(
+                                zAcc, time, mCurrLoc.getLongitude(), mCurrLoc.getLatitude(),
+                                mCurrLoc.getAltitude(), mCurrLoc.getSpeed(), mCurrLoc.getAccuracy()
+                        );
+                    }
+
+                    mLocSemaphore.release();
+
+                    if (m != null) {
+                        Measurements.sData.add(m);
+                        mCurrMeasurement.set(Measurements.sData.size());
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
 
         @Override
-        public void onAccuracyChanged(Sensor sensor, int i) { }
+        public void onAccuracyChanged(Sensor sensor, int i) { /* Unused */ }
     };
 
+    /**
+     * Currently used as a debug test function
+     *
+     * @param view
+     */
     public void export(View view) {
         Toast.makeText(this, String.valueOf(mCurrMeasurement.get()), Toast.LENGTH_SHORT).show();
     }
@@ -219,18 +257,30 @@ public class MainActivity extends AppCompatActivity {
     /*
     Store in Excel CSV file
      public void export(View view) {
-         //generate data
          StringBuilder data = new StringBuilder();
          data.append("Date,Time,Z Acc, Z Acc filter,Latitude,Longitude,Altitude,Speed,Accuracy,Address,Serial,Model,ID,Manufacturer,Brand,Version code");
          int i = 0;
          String arrayDateFinal = arrayDate.get(i);
-         //for each index, take the value from the arrays
-         //For loop is currently not displaying the arrays correctly into the csv file
          for (i = 0; i < arrayZvalues.size(); i++) {
-             data.append("\n").append(arrayDateFinal).append(",").append(arrayTime.get(i)).append(",").append(arrayZvalues.get(i)).append(',').append(z.get(i)).append(",").append(arrayLat.get(i)).append(",").append(arrayLon.get(i)).append(",").append(arrayAlt.get(i)).append(",").append(arraySpeed.get(i)).append(",").append(arrayAccuracy.get(i)).append(",").append("address").append(",").append(Build.SERIAL).append(",").append(Build.MODEL).append(",").append(Build.ID).append(",").append(Build.MANUFACTURER).append(",").append(Build.BRAND).append(",").append(Build.VERSION.RELEASE);
+             data.append("\n")
+                .append(arrayDateFinal).append(",")
+                .append(arrayTime.get(i)).append(",")
+                .append(arrayZvalues.get(i)).append(',')
+                .append(z.get(i)).append(",")
+                .append(arrayLat.get(i)).append(",")
+                .append(arrayLon.get(i)).append(",")
+                .append(arrayAlt.get(i)).append(",")
+                .append(arraySpeed.get(i)).append(",")
+                .append(arrayAccuracy.get(i)).append(",")
+                .append("address").append(",")
+                .append(Build.SERIAL).append(",")
+                .append(Build.MODEL).append(",")
+                .append(Build.ID).append(",")
+                .append(Build.MANUFACTURER).append(",")
+                .append(Build.BRAND).append(",")
+                .append(Build.VERSION.RELEASE);
          }
          try {
-             //saving the file into device
              FileOutputStream out = openFileOutput("data.csv", Context.MODE_PRIVATE);
              out.write((data.toString()).getBytes());
              out.close();
@@ -248,6 +298,7 @@ public class MainActivity extends AppCompatActivity {
              e.printStackTrace();
          }
      }
+
      public class filtering {
          public void main(String[] args) {
              //Low pass filter first section
@@ -316,5 +367,4 @@ public class MainActivity extends AppCompatActivity {
          }
      }
     */
-
 }

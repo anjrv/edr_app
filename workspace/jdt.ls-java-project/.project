@@ -16,6 +16,11 @@
 	</natures>
 	<linkedResources>
 		<link>
+			<name>src/com/example/storage/MainActivity.java</name>
+			<type>1</type>
+			<location>//home/anjrv/Projects/edr_app/app/src/main/java/com/example/storage/MainActivity.java</location>
+		</link>
+		<link>
 			<name>src/com/example/storage/Measurement.java</name>
 			<type>1</type>
 			<location>//home/anjrv/Projects/edr_app/app/src/main/java/com/example/storage/Measurement.java</location>
