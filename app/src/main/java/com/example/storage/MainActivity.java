@@ -32,14 +32,13 @@ import com.google.android.gms.location.LocationServices;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding mBinding;
 
-    private AtomicInteger mCurrMeasurement = new AtomicInteger();
     private final Semaphore mLocSemaphore = new Semaphore(1, true);
     private Location mCurrLoc; // Sensor and Location threads both need to use this
+    private volatile boolean switchToggled;
 
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private LocationRequest mLocationRequest;
@@ -84,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onLocationResult(@NonNull LocationResult locationResult) {
                 super.onLocationResult(locationResult);
-                if (mBinding.switchBtn.isChecked()) {
+                if (switchToggled) {
                     try {
                         mLocSemaphore.acquire();
                         mCurrLoc = locationResult.getLastLocation();
@@ -96,24 +95,28 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
+        switchToggled = false;
         mBinding.switchBtn.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
+                switchToggled = true;
                 Toast.makeText(getBaseContext(), "ON", Toast.LENGTH_SHORT).show();
                 startLocationUpdates();
-                mBinding.aid.setText(Build.ID);
-                mBinding.aversioncode.setText(Build.VERSION.RELEASE);
-                mBinding.abrand.setText(Build.BRAND);
-                mBinding.amanuf.setText(Build.MANUFACTURER);
-                mBinding.amodel.setText(Build.MODEL);
             } else {
+                switchToggled = false;
                 if (mFusedLocationProviderClient != null)
                     mFusedLocationProviderClient.removeLocationUpdates(mLocationCallback);
             }
         });
 
+        mBinding.aid.setText(Build.ID);
+        mBinding.aversioncode.setText(Build.VERSION.RELEASE);
+        mBinding.abrand.setText(Build.BRAND);
+        mBinding.amanuf.setText(Build.MANUFACTURER);
+        mBinding.amodel.setText(Build.MODEL);
+
         int approxRefresh = (int) (1000 / ((WindowManager) getSystemService(Context.WINDOW_SERVICE))
                 .getDefaultDisplay()
-                .getRefreshRate());
+                .getRefreshRate()) + 1;
 
         new Thread(() -> {
             while (true) {
@@ -123,11 +126,19 @@ public class MainActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
 
-                if (mBinding.switchBtn.isChecked()) {
+                if (switchToggled) {
                     runOnUiThread(() -> {
-                        int idx = mCurrMeasurement.get();
-                        if (idx > 0) {
-                            updateUI(Measurements.sData.get(idx - 1));
+                        try {
+                            Measurements.sMeasSemaphore.acquire();
+
+                            int idx = Measurements.sData.size() - 1;
+                            if (idx > 0) {
+                                updateUI(Measurements.sData.get(idx));
+                            }
+
+                            Measurements.sMeasSemaphore.release();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
                         }
                     });
                 }
@@ -208,7 +219,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         @SuppressLint("SimpleDateFormat")
         public void onSensorChanged(SensorEvent event) {
-            if (mBinding.switchBtn.isChecked() && event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            if (switchToggled && event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
                 Float zAcc = event.values[2];
                 long time = System.currentTimeMillis();
 
@@ -226,8 +237,9 @@ public class MainActivity extends AppCompatActivity {
                     mLocSemaphore.release();
 
                     if (m != null) {
+                        Measurements.sMeasSemaphore.acquire();
                         Measurements.sData.add(m);
-                        mCurrMeasurement.set(Measurements.sData.size());
+                        Measurements.sMeasSemaphore.release();
                     }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -245,7 +257,13 @@ public class MainActivity extends AppCompatActivity {
      * @param view the calling view
      */
     public void export(View view) {
-        Toast.makeText(this, String.valueOf(mCurrMeasurement.get()), Toast.LENGTH_SHORT).show();
+        try {
+            Measurements.sMeasSemaphore.acquire();
+            Toast.makeText(this, String.valueOf(Measurements.sData.size()), Toast.LENGTH_SHORT).show();
+            Measurements.sMeasSemaphore.release();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     /*
