@@ -309,6 +309,12 @@ public class MainActivity extends AppCompatActivity {
                     .requestLocationUpdates(mLocationRequest, mLocationCallback, mLocationLooper);
     }
 
+    /**
+     * Helper function to kick off screen updates to slightly slower than screen refresh
+     *
+     * Approximate timing is impossible and assigning faster than refresh updates crashes eventually
+     * due to vsync inconsistencies.
+     */
     private void scheduleUITimer() {
         mViewTimer.schedule(new TimerTask() {
             @Override
