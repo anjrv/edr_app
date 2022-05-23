@@ -1,16 +1,20 @@
 package com.example.storage;
 
-public class Measurement {
-    private final Float zValue;
-    private final Long time;
-    private final Double longitude;
-    private final Double latitude;
-    private final Double altitude;
-    private final Float speed;
-    private final Float accuracy;
+import androidx.annotation.NonNull;
 
-    public Measurement(Float zValue, Long time, Double longitude, Double latitude, Double altitude, Float speed, Float accuracy) {
+public class Measurement implements Cloneable {
+    private final double zValue;
+    private double filteredZValue;
+    private final long time;
+    private final double longitude;
+    private final double latitude;
+    private final double altitude;
+    private final float speed;
+    private final float accuracy;
+
+    public Measurement(Double zValue, Double filteredZValue, Long time, Double longitude, Double latitude, Double altitude, Float speed, Float accuracy) {
         this.zValue = zValue;
+        this.filteredZValue = filteredZValue;
         this.time = time;
         this.longitude = longitude;
         this.latitude = latitude;
@@ -19,31 +23,43 @@ public class Measurement {
         this.accuracy = accuracy;
     }
 
-    public Float getzValue() {
+    public double getzValue() {
         return zValue;
     }
 
-    public Long getTime() {
+    public void setFilteredZValue(Double filteredZValue) { this.filteredZValue = filteredZValue; }
+
+    public double getFilteredZValue() { return filteredZValue; }
+
+    public long getTime() {
         return time;
     }
 
-    public Double getLongitude() {
+    public double getLongitude() {
         return longitude;
     }
 
-    public Double getLatitude() {
+    public double getLatitude() {
         return latitude;
     }
 
-    public Double getAltitude() {
+    public double getAltitude() {
         return altitude;
     }
 
-    public Float getSpeed() {
+    public float getSpeed() {
         return speed;
     }
 
-    public Float getAccuracy() {
+    public float getAccuracy() {
         return accuracy;
+    }
+
+    @NonNull
+    public Object clone() throws CloneNotSupportedException {
+        Measurement clone = null;
+        clone = (Measurement) super.clone();
+
+        return clone;
     }
 }
