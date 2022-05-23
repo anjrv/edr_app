@@ -384,7 +384,7 @@ public class MainActivity extends AppCompatActivity {
                 System.out.println(msg);
             }
             Measurements.sMeasSemaphore.release();
-        } catch (InterruptedException | CloneNotSupportedException | JsonProcessingException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
