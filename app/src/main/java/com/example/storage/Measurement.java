@@ -68,7 +68,7 @@ public class Measurement implements Cloneable {
     }
 
     @NonNull
-    public Object clone() throws CloneNotSupportedException {
+    public Measurement clone() throws CloneNotSupportedException {
         Measurement clone = null;
         // All values are eventually stored as primitives
         // No deeper cloning should be required

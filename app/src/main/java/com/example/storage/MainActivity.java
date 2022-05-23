@@ -23,6 +23,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import com.example.storage.databinding.ActivityMainBinding;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -372,82 +373,18 @@ public class MainActivity extends AppCompatActivity {
     public void export(View view) {
         try {
             Measurements.sMeasSemaphore.acquire();
-            Toast.makeText(this, String.valueOf(Measurements.sData.size()), Toast.LENGTH_SHORT).show();
+            if (Measurements.sData.size() > 0) {
+                ArrayList<Measurement> copy = new ArrayList<>();
+                copy.add(Measurements.sData.get(0).clone()); // Iter and clone all
+                copy.add(Measurements.sData.get(1).clone());
 
-            if (Measurements.sData.size() == 0) {
-                Measurements.sMeasSemaphore.release();
-                return;
+                // Likely want to pass this entire process along with mqtt send into its own thread
+                Dataframe d = new Dataframe(Build.BRAND, Build.MANUFACTURER, Build.MODEL, Build.ID, Build.VERSION.RELEASE, copy);
+                String msg = JsonConverter.convert(d);
+                System.out.println(msg);
             }
-
-            ArrayList<Double> z = new ArrayList<>();
-            ArrayList<Double> x = new ArrayList<>();
-            ArrayList<Double> y = new ArrayList<>();
-            ArrayList<Double> w = new ArrayList<>();
-
-            double data1;
-            double datagain;
-
-            //Build low pass filter first section
-            // y(n) = b0x(n) + b1x(n-1) + b2(x(n-2) - a1y(n-1) - a2y(n-2)
-            z.add(0, (B0 * Measurements.sData.get(0).getzValue()) * 0.000963484325512291);
-            z.add(1, (B0 * Measurements.sData.get(1).getzValue() + B1 * Measurements.sData.get(0).getzValue() - A1 * z.get(0)) * 0.000963484325512291);
-
-            int i = 0;
-            for (i = 2; i < Measurements.sData.size(); i++) {
-                data1 = (B0 * Measurements.sData.get(i).getzValue() + B1 * Measurements.sData.get(i - 1).getzValue() + B2 * Measurements.sData.get(i - 2).getzValue() - (A1) * z.get(i - 1) - (A2) * z.get(i - 2));
-                datagain = data1 * 0.000963484325512291;
-                z.add(i, datagain);
-            }
-
-            //low pass filter second section
-            //constants
-
-            double data2;
-            double datagain2;
-
-            //Build low pass filter second section
-            x.add(0, B01 * z.get(0) * 0.000932538415629474);
-            x.add(1, (B01 * z.get(1) + B11 * z.get(0) - A11 * x.get(0)) * 0.000932538415629474);
-            for (i = 2; i < Measurements.sData.size(); i++) {
-                data2 = ((B01 * z.get(i) + B11 * z.get(i - 1) + B21 * z.get(i - 2) - A11 * x.get(i - 1) - A21 * x.get(i - 2)));
-                datagain2 = data2 * 0.000932538415629474;
-                x.add(i, datagain2);
-            }
-
-            //high pass filter first section
-            //constants
-
-            double data3;
-            double datagain3;
-
-            //Build high pass filter first section
-            y.add(0, B02 * x.get(0) * 0.999518942496229523);
-            y.add(1, (B02 * x.get(1) + B12 * x.get(0) - A12 * y.get(0)) * 0.999518942496229523);
-            for (i = 2; i < Measurements.sData.size(); i++) {
-                data3 = (B02 * x.get(i) + B12 * x.get(i - 1) + B22 * x.get(i - 2) - A12 * y.get(i - 1) - A22 * y.get(i - 2));
-                datagain3 = data3 * 0.999518942496229523;
-                y.add(i, datagain3);
-            }
-
-            //high pass filter second section
-            //constants
-
-            double data4;
-            double datagain4;
-
-            //Build high pass filter second section
-            w.add(0, B03 * y.get(0) * 0.998839971032117524);
-            w.add(1, (B03 * y.get(1) + B13 * y.get(0) - A13 * w.get(0)) * 0.998839971032117524);
-            for (i = 2; i < Measurements.sData.size(); i++) {
-                data4 = (B03 * y.get(i) + B13 * y.get(i - 1) + B23 * y.get(i - 2) - A13 * w.get(i - 1) - A23 * w.get(i - 2));
-                datagain4 = data4 * 0.998839971032117524;
-                w.add(i, datagain4);
-            }
-
-            System.out.println("Export: " + w.get(Measurements.sData.size() - 1) + " Loop: " + Measurements.sData.get(Measurements.sData.size() - 1).getFilteredZValue());
-
             Measurements.sMeasSemaphore.release();
-        } catch (InterruptedException e) {
+        } catch (InterruptedException | CloneNotSupportedException | JsonProcessingException e) {
             e.printStackTrace();
         }
     }
