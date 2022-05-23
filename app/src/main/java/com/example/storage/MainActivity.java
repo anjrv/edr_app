@@ -39,6 +39,21 @@ import java.util.concurrent.Semaphore;
 public class MainActivity extends AppCompatActivity {
     private final Semaphore mLocSemaphore = new Semaphore(1, true);
 
+    private ActivityMainBinding mBinding;
+    private Timer mViewTimer;
+    private int mApproxRefresh;
+
+    private volatile boolean switchToggled;
+
+    private Location mCurrLoc; // Sensor and Location threads both need to use this
+    private FusedLocationProviderClient mFusedLocationProviderClient;
+    private LocationRequest mLocationRequest;
+    private LocationCallback mLocationCallback;
+    private Looper mLocationLooper;
+
+    private SensorManager mSensorManager;
+    private Sensor mAccelerometer;
+
     private final int PERMISSION_FINE_LOCATION = 99;
 
     private final double B0 = 1;
@@ -61,12 +76,6 @@ public class MainActivity extends AppCompatActivity {
     private final double B23 = 1;
     private final double A13 = -1.99767915341159740;
     private final double A23 = 0.997680730716872465;
-
-    private ActivityMainBinding mBinding;
-    private Timer mViewTimer;
-    private int mApproxRefresh;
-    private Location mCurrLoc; // Sensor and Location threads both need to use this
-    private volatile boolean switchToggled;
 
     /**
      * Listener for accelerometer events
@@ -182,12 +191,6 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onAccuracyChanged(Sensor sensor, int i) { /* Unused */ }
     };
-    private FusedLocationProviderClient mFusedLocationProviderClient;
-    private LocationRequest mLocationRequest;
-    private LocationCallback mLocationCallback;
-    private Looper mLocationLooper;
-    private SensorManager mSensorManager;
-    private Sensor mAccelerometer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
