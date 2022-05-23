@@ -23,7 +23,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import com.example.storage.databinding.ActivityMainBinding;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -39,44 +38,12 @@ import java.util.concurrent.Semaphore;
 
 public class MainActivity extends AppCompatActivity {
     private final Semaphore mLocSemaphore = new Semaphore(1, true);
-
+    private final int PERMISSION_FINE_LOCATION = 99;
     private ActivityMainBinding mBinding;
     private Timer mViewTimer;
     private int mApproxRefresh;
-
     private volatile boolean switchToggled;
-
     private Location mCurrLoc; // Sensor and Location threads both need to use this
-    private FusedLocationProviderClient mFusedLocationProviderClient;
-    private LocationRequest mLocationRequest;
-    private LocationCallback mLocationCallback;
-    private Looper mLocationLooper;
-
-    private SensorManager mSensorManager;
-    private Sensor mAccelerometer;
-
-    private final int PERMISSION_FINE_LOCATION = 99;
-
-    private final double B0 = 1;
-    private final double B1 = 2;
-    private final double B2 = 1;
-    private final double A1 = -1.94921595802584;
-    private final double A2 = 0.953069895327891;
-    private final double B01 = 1;
-    private final double B11 = 2;
-    private final double B21 = 1;
-    private final double A11 = -1.88660958262151;
-    private final double A21 = 0.890339736284024;
-    private final double B02 = 1;
-    private final double B12 = -2;
-    private final double B22 = 1;
-    private final double A12 = -1.999037095803727126;
-    private final double A22 = 0.9990386741811910775;
-    private final double B03 = 1;
-    private final double B13 = -2;
-    private final double B23 = 1;
-    private final double A13 = -1.99767915341159740;
-    private final double A23 = 0.997680730716872465;
 
     /**
      * Listener for accelerometer events
@@ -108,29 +75,42 @@ public class MainActivity extends AppCompatActivity {
                     mLocSemaphore.release();
 
                     if (m != null) {
+                        double b0 = 1;
+                        double b1 = 2;
+                        double a1 = -1.94921595802584;
+                        double b01 = 1;
+                        double b11 = 2;
+                        double a11 = -1.88660958262151;
+                        double b02 = 1;
+                        double b12 = -2;
+                        double a12 = -1.999037095803727126;
+                        double b03 = 1;
+                        double b13 = -2;
+                        double a13 = -1.99767915341159740;
+
                         Measurements.sMeasSemaphore.acquire();
                         if (Measurements.consecutiveMeasurements == 0) {
                             Measurements.zVal[0] = m.getzValue();
-                            Measurements.z[0] = (B0 * Measurements.zVal[0]) * 0.000963484325512291;
-                            Measurements.x[0] = (B01 * Measurements.z[0]) * 0.000932538415629474;
-                            Measurements.y[0] = (B02 * Measurements.x[0]) * 0.999518942496229523;
-                            Measurements.w[0] = (B03 * Measurements.y[0]) * 0.998839971032117524;
+                            Measurements.z[0] = (b0 * Measurements.zVal[0]) * 0.000963484325512291;
+                            Measurements.x[0] = (b01 * Measurements.z[0]) * 0.000932538415629474;
+                            Measurements.y[0] = (b02 * Measurements.x[0]) * 0.999518942496229523;
+                            Measurements.w[0] = (b03 * Measurements.y[0]) * 0.998839971032117524;
 
                             m.setFilteredZValue(Measurements.w[0]);
                         } else if (Measurements.consecutiveMeasurements == 1) {
                             Measurements.zVal[1] = m.getzValue();
 
-                            Measurements.z[1] = (B0 * Measurements.zVal[1] + B1 * Measurements.zVal[0]
-                                    - A1 * Measurements.z[0]) * 0.000963484325512291;
+                            Measurements.z[1] = (b0 * Measurements.zVal[1] + b1 * Measurements.zVal[0]
+                                    - a1 * Measurements.z[0]) * 0.000963484325512291;
 
-                            Measurements.x[1] = (B01 * Measurements.z[1] + B11 * Measurements.z[0]
-                                    - A11 * Measurements.x[0]) * 0.000932538415629474;
+                            Measurements.x[1] = (b01 * Measurements.z[1] + b11 * Measurements.z[0]
+                                    - a11 * Measurements.x[0]) * 0.000932538415629474;
 
-                            Measurements.y[1] = (B02 * Measurements.x[1] + B12 * Measurements.x[0]
-                                    - A12 * Measurements.y[0]) * 0.999518942496229523;
+                            Measurements.y[1] = (b02 * Measurements.x[1] + b12 * Measurements.x[0]
+                                    - a12 * Measurements.y[0]) * 0.999518942496229523;
 
-                            Measurements.w[1] = (B03 * Measurements.y[1] + B13 * Measurements.y[0]
-                                    - A13 * Measurements.w[0]) * 0.998839971032117524;
+                            Measurements.w[1] = (b03 * Measurements.y[1] + b13 * Measurements.y[0]
+                                    - a13 * Measurements.w[0]) * 0.998839971032117524;
 
                             m.setFilteredZValue(Measurements.w[1]);
                         } else {
@@ -154,25 +134,33 @@ public class MainActivity extends AppCompatActivity {
 
                             Measurements.zVal[2] = m.getzValue();
 
-                            double zData = (B0 * Measurements.zVal[2]
-                                    + B1 * Measurements.zVal[1]
-                                    + B2 * Measurements.zVal[0]
-                                    - (A1) * Measurements.z[1] - (A2) * Measurements.z[0]);
+                            double b2 = 1;
+                            double a2 = 0.953069895327891;
+                            double zData = (b0 * Measurements.zVal[2]
+                                    + b1 * Measurements.zVal[1]
+                                    + b2 * Measurements.zVal[0]
+                                    - (a1) * Measurements.z[1] - (a2) * Measurements.z[0]);
 
                             Measurements.z[2] = zData * 0.000963484325512291;
 
-                            double xData = (B01 * Measurements.z[2] + B11 * Measurements.z[1]
-                                    + B21 * Measurements.z[0] - A11 * Measurements.x[1] - A21 * Measurements.x[0]);
+                            double b21 = 1;
+                            double a21 = 0.890339736284024;
+                            double xData = (b01 * Measurements.z[2] + b11 * Measurements.z[1]
+                                    + b21 * Measurements.z[0] - a11 * Measurements.x[1] - a21 * Measurements.x[0]);
 
                             Measurements.x[2] = xData * 0.000932538415629474;
 
-                            double yData = (B02 * Measurements.x[2] + B12 * Measurements.x[1]
-                                    + B22 * Measurements.x[0] - A12 * Measurements.y[1] - A22 * Measurements.y[0]);
+                            double b22 = 1;
+                            double a22 = 0.9990386741811910775;
+                            double yData = (b02 * Measurements.x[2] + b12 * Measurements.x[1]
+                                    + b22 * Measurements.x[0] - a12 * Measurements.y[1] - a22 * Measurements.y[0]);
 
                             Measurements.y[2] = yData * 0.999518942496229523;
 
-                            double wData = (B03 * Measurements.y[2] + B13 * Measurements.y[1]
-                                    + B23 * Measurements.y[0] - A13 * Measurements.w[1] - A23 * Measurements.w[0]);
+                            double b23 = 1;
+                            double a23 = 0.997680730716872465;
+                            double wData = (b03 * Measurements.y[2] + b13 * Measurements.y[1]
+                                    + b23 * Measurements.y[0] - a13 * Measurements.w[1] - a23 * Measurements.w[0]);
 
                             Measurements.w[2] = wData * 0.998839971032117524;
 
@@ -192,6 +180,13 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onAccuracyChanged(Sensor sensor, int i) { /* Unused */ }
     };
+
+    private FusedLocationProviderClient mFusedLocationProviderClient;
+    private LocationRequest mLocationRequest;
+    private LocationCallback mLocationCallback;
+    private Looper mLocationLooper;
+    private SensorManager mSensorManager;
+    private Sensor mAccelerometer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -321,7 +316,7 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Helper function to kick off screen updates to slightly slower than screen refresh
-     *
+     * <p>
      * Approximate timing is impossible and assigning faster than refresh updates crashes eventually
      * due to vsync inconsistencies.
      */
