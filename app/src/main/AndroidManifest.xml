@@ -16,7 +16,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Storage">
         <activity android:name=".MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -25,7 +27,6 @@
         </activity>
 
         <provider
-
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.example.Storage.fileprovider"
             android:grantUriPermissions="true"
