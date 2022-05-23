@@ -12,6 +12,18 @@ public class Measurement implements Cloneable {
     private final float speed;
     private final float accuracy;
 
+    /**
+     * Container class for storing moment to moment measurements
+     *
+     * @param zValue The z Acceleration value read from the sensor
+     * @param filteredZValue The four section filter z value result
+     * @param time Time of measurement in UTC milliseconds
+     * @param longitude The longitude obtained by location measurement
+     * @param latitude The latitude obtained by location measurement
+     * @param altitude The altitude obtained by location measurement
+     * @param speed The estimated speed obtained by location measurement
+     * @param accuracy The percentage accuracy estimation of the location sensor during the measurement
+     */
     public Measurement(Double zValue, Double filteredZValue, Long time, Double longitude, Double latitude, Double altitude, Float speed, Float accuracy) {
         this.zValue = zValue;
         this.filteredZValue = filteredZValue;

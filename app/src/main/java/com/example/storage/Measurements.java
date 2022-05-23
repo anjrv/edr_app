@@ -3,6 +3,12 @@ package com.example.storage;
 import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
 
+/**
+ * Storage wrapper for measurements
+ *
+ * This is necessary to ensure that measurement memory is static with app life time
+ * and is not lost with a forced application pause
+ */
 public class Measurements {
     public static final Semaphore sMeasSemaphore = new Semaphore(1, true);
 
