@@ -36,14 +36,21 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Semaphore;
 
+import info.mqtt.android.service.MqttAndroidClient;
+
 public class MainActivity extends AppCompatActivity {
     private final Semaphore mLocSemaphore = new Semaphore(1, true);
     private final int PERMISSION_FINE_LOCATION = 99;
+    private final String TOPIC = "EDR";
+    private final String SERVER = "tcp://192.168.1.6:1883";
+
     private ActivityMainBinding mBinding;
     private Timer mViewTimer;
     private int mApproxRefresh;
     private volatile boolean switchToggled;
     private Location mCurrLoc; // Sensor and Location threads both need to use this
+
+    private MqttAndroidClient mPublisher;
 
     /**
      * Listener for accelerometer events
@@ -260,6 +267,9 @@ public class MainActivity extends AppCompatActivity {
 
         mViewTimer = new Timer();
         scheduleUITimer();
+
+        mPublisher = Mqtt.generateClient(this, SERVER);
+        Mqtt.connect(mPublisher);
     }
 
     @Override
@@ -377,6 +387,8 @@ public class MainActivity extends AppCompatActivity {
                 Dataframe d = new Dataframe(Build.BRAND, Build.MANUFACTURER, Build.MODEL, Build.ID, Build.VERSION.RELEASE, copy);
                 String msg = JsonConverter.convert(d);
                 System.out.println(msg);
+
+                Mqtt.publish(this, mPublisher, TOPIC, msg);
             }
             Measurements.sMeasSemaphore.release();
         } catch (Exception e) {

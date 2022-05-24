@@ -30,17 +30,6 @@
             </intent-filter>
         </activity>
 
-        <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="com.example.Storage.fileprovider"
-            android:grantUriPermissions="true"
-            android:exported="false">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/providor_paths"/>
-
-        </provider>
-
         <service
             android:name="org.eclipse.paho.android.service.MqttService">
         </service>
