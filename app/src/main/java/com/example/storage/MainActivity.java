@@ -346,7 +346,7 @@ public class MainActivity extends AppCompatActivity {
                             Measurements.sMeasSemaphore.acquire();
 
                             int idx = Measurements.sData.size() - 1;
-                            if (idx > 0) {
+                            if (idx >= 0) {
                                 updateUI(Measurements.sData.get(idx));
                             }
 
