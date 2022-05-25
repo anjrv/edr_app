@@ -2,7 +2,6 @@ package com.example.storage;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -15,7 +14,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -41,8 +39,6 @@ import info.mqtt.android.service.MqttAndroidClient;
 public class MainActivity extends AppCompatActivity {
     private final Semaphore mLocSemaphore = new Semaphore(1, true);
     private final int PERMISSION_FINE_LOCATION = 99;
-    private final String TOPIC = "EDR";
-    private final String SERVER = "tcp://192.168.1.6:1883";
 
     private ActivityMainBinding mBinding;
     private Timer mViewTimer;
@@ -95,32 +91,46 @@ public class MainActivity extends AppCompatActivity {
                         double b13 = -2;
                         double a13 = -1.99767915341159740;
 
+                        double zWeight = 0.000963484325512291;
+                        double xWeight = 0.000932538415629474;
+                        double yWeight = 0.999518942496229523;
+                        double wWeight = 0.998839971032117524;
+
                         Measurements.sMeasSemaphore.acquire();
                         if (Measurements.consecutiveMeasurements == 0) {
                             Measurements.zVal[0] = m.getzValue();
-                            Measurements.z[0] = (b0 * Measurements.zVal[0]) * 0.000963484325512291;
-                            Measurements.x[0] = (b01 * Measurements.z[0]) * 0.000932538415629474;
-                            Measurements.y[0] = (b02 * Measurements.x[0]) * 0.999518942496229523;
-                            Measurements.w[0] = (b03 * Measurements.y[0]) * 0.998839971032117524;
+                            Measurements.z[0] = (b0 * Measurements.zVal[0]) * zWeight;
+                            Measurements.x[0] = (b01 * Measurements.z[0]) * xWeight;
+                            Measurements.y[0] = (b02 * Measurements.x[0]) * yWeight;
+                            Measurements.w[0] = (b03 * Measurements.y[0]) * wWeight;
 
                             m.setFilteredZValue(Measurements.w[0]);
                         } else if (Measurements.consecutiveMeasurements == 1) {
                             Measurements.zVal[1] = m.getzValue();
 
                             Measurements.z[1] = (b0 * Measurements.zVal[1] + b1 * Measurements.zVal[0]
-                                    - a1 * Measurements.z[0]) * 0.000963484325512291;
+                                    - a1 * Measurements.z[0]) * zWeight;
 
                             Measurements.x[1] = (b01 * Measurements.z[1] + b11 * Measurements.z[0]
-                                    - a11 * Measurements.x[0]) * 0.000932538415629474;
+                                    - a11 * Measurements.x[0]) * xWeight;
 
                             Measurements.y[1] = (b02 * Measurements.x[1] + b12 * Measurements.x[0]
-                                    - a12 * Measurements.y[0]) * 0.999518942496229523;
+                                    - a12 * Measurements.y[0]) * yWeight;
 
                             Measurements.w[1] = (b03 * Measurements.y[1] + b13 * Measurements.y[0]
-                                    - a13 * Measurements.w[0]) * 0.998839971032117524;
+                                    - a13 * Measurements.w[0]) * wWeight;
 
                             m.setFilteredZValue(Measurements.w[1]);
                         } else {
+                            double b2 = 1;
+                            double a2 = 0.953069895327891;
+                            double b21 = 1;
+                            double a21 = 0.890339736284024;
+                            double b22 = 1;
+                            double a22 = 0.9990386741811910775;
+                            double b23 = 1;
+                            double a23 = 0.997680730716872465;
+
                             if (Measurements.consecutiveMeasurements > 2) {
                                 // Shift running stats to the left
                                 Measurements.zVal[0] = Measurements.zVal[1];
@@ -141,35 +151,27 @@ public class MainActivity extends AppCompatActivity {
 
                             Measurements.zVal[2] = m.getzValue();
 
-                            double b2 = 1;
-                            double a2 = 0.953069895327891;
                             double zData = (b0 * Measurements.zVal[2]
                                     + b1 * Measurements.zVal[1]
                                     + b2 * Measurements.zVal[0]
                                     - (a1) * Measurements.z[1] - (a2) * Measurements.z[0]);
 
-                            Measurements.z[2] = zData * 0.000963484325512291;
+                            Measurements.z[2] = zData * zWeight;
 
-                            double b21 = 1;
-                            double a21 = 0.890339736284024;
                             double xData = (b01 * Measurements.z[2] + b11 * Measurements.z[1]
                                     + b21 * Measurements.z[0] - a11 * Measurements.x[1] - a21 * Measurements.x[0]);
 
-                            Measurements.x[2] = xData * 0.000932538415629474;
+                            Measurements.x[2] = xData * xWeight;
 
-                            double b22 = 1;
-                            double a22 = 0.9990386741811910775;
                             double yData = (b02 * Measurements.x[2] + b12 * Measurements.x[1]
                                     + b22 * Measurements.x[0] - a12 * Measurements.y[1] - a22 * Measurements.y[0]);
 
-                            Measurements.y[2] = yData * 0.999518942496229523;
+                            Measurements.y[2] = yData * yWeight;
 
-                            double b23 = 1;
-                            double a23 = 0.997680730716872465;
                             double wData = (b03 * Measurements.y[2] + b13 * Measurements.y[1]
                                     + b23 * Measurements.y[0] - a13 * Measurements.w[1] - a23 * Measurements.w[0]);
 
-                            Measurements.w[2] = wData * 0.998839971032117524;
+                            Measurements.w[2] = wData * wWeight;
 
                             m.setFilteredZValue(Measurements.w[2]);
                         }
@@ -208,7 +210,7 @@ public class MainActivity extends AppCompatActivity {
         // Thread looper to be used for accelerometer callbacks
         new Thread(() -> {
             Looper.prepare();
-            Handler sensorHandler = new Handler();
+            Handler sensorHandler = new Handler(Looper.myLooper());
             mSensorManager
                     .registerListener(mSensorEventListener, mAccelerometer, SensorManager.SENSOR_DELAY_FASTEST, sensorHandler);
             Looper.loop();
@@ -261,14 +263,18 @@ public class MainActivity extends AppCompatActivity {
         mBinding.amanuf.setText(Build.MANUFACTURER);
         mBinding.amodel.setText(Build.MODEL);
 
-        mApproxRefresh = (int) (1000 / ((WindowManager) getSystemService(Context.WINDOW_SERVICE))
-                .getDefaultDisplay()
-                .getRefreshRate()) + 1;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            mApproxRefresh = (int) (1000 / this.getDisplay().getRefreshRate()) + 1;
+        } else {
+            // Assume 60fps ish, rounded up to not kick off vsync errors
+            mApproxRefresh = 17;
+        }
 
         mViewTimer = new Timer();
         scheduleUITimer();
 
-        mPublisher = Mqtt.generateClient(this, SERVER);
+        String server = "tcp://192.168.1.6:1883";
+        mPublisher = Mqtt.generateClient(this, server);
         Mqtt.connect(mPublisher);
     }
 
@@ -368,6 +374,8 @@ public class MainActivity extends AppCompatActivity {
         mBinding.time
                 .setText(new SimpleDateFormat("dd MMM yyyy HH:mm")
                         .format(new Date(m.getTime())));
+
+        mBinding.tvAddress.setText(String.valueOf(m.getFilteredZValue()));
     }
 
     /**
@@ -379,8 +387,11 @@ public class MainActivity extends AppCompatActivity {
         try {
             Measurements.sMeasSemaphore.acquire();
             if (Measurements.sData.size() > 0) {
+                // Currently used for debugging copy, conversion and mqtt publish
+                // Copying should later be done in the onSensor calculation loop
+                // And the copy pushed to a Queue with its own worker thread which does the rest
                 ArrayList<Measurement> copy = new ArrayList<>();
-                copy.add(Measurements.sData.get(0).clone()); // Iter and clone all
+                copy.add(Measurements.sData.get(0).clone());
                 copy.add(Measurements.sData.get(1).clone());
 
                 // Likely want to pass this entire process along with mqtt send into its own thread
@@ -388,7 +399,8 @@ public class MainActivity extends AppCompatActivity {
                 String msg = JsonConverter.convert(d);
                 System.out.println(msg);
 
-                Mqtt.publish(this, mPublisher, TOPIC, msg);
+                String topic = "EDR";
+                Mqtt.publish(this, mPublisher, topic, msg);
             }
             Measurements.sMeasSemaphore.release();
         } catch (Exception e) {
