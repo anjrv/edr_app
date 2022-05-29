@@ -3,6 +3,7 @@ package com.example.storage;
 import android.content.Context;
 
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.IMqttToken;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
@@ -46,26 +47,11 @@ public class Mqtt {
         });
     }
 
-    public static void publish(Context c, MqttAndroidClient client, String topic, String msg) {
-        // if (!client.isConnected())
-        //     client.connect();
-
+    public static IMqttDeliveryToken publish(MqttAndroidClient client, String topic, byte[] msg) {
         MqttMessage message = new MqttMessage();
-        message.setPayload(msg.getBytes());
+        message.setPayload(msg);
         message.setQos(0);
 
-        client.publish(topic, message);
-
-        // client.publish(topic, message, c, new IMqttActionListener() {
-        //     @Override
-        //     public void onSuccess(IMqttToken asyncActionToken) {
-        //         System.out.println("sent");
-        //     }
-
-        //     @Override
-        //     public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-        //         System.out.println("failed");
-        //     }
-        // });
+        return client.publish(topic, message);
     }
 }

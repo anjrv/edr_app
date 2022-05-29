@@ -177,10 +177,24 @@ public class MainActivity extends AppCompatActivity {
                         }
 
                         Measurements.consecutiveMeasurements++;
+
+                        if (Measurements.sData.size() >= 10000) {
+                            ArrayList<Measurement> copy = new ArrayList<>();
+
+                            for (Measurement ms:Measurements.sData) {
+                                copy.add(ms.clone());
+                            }
+
+                            Dataframe d = new Dataframe(Build.BRAND, Build.MANUFACTURER, Build.MODEL, Build.ID, Build.VERSION.RELEASE, copy);
+                            mMessageThread.handleMessage(d, mPublisher);
+
+                            Measurements.sData.clear();
+                        }
+
                         Measurements.sData.add(m);
                         Measurements.sMeasSemaphore.release();
                     }
-                } catch (InterruptedException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
@@ -196,6 +210,7 @@ public class MainActivity extends AppCompatActivity {
     private Looper mLocationLooper;
     private SensorManager mSensorManager;
     private Sensor mAccelerometer;
+    private MessageThread mMessageThread;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -243,6 +258,9 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
+
+        mMessageThread = new MessageThread();
+        mMessageThread.start();
 
         switchToggled = false;
         mBinding.switchBtn.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -295,6 +313,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
+        try {
+            Measurements.sMeasSemaphore.acquire();
+            Measurements.consecutiveMeasurements = 0;
+            Measurements.sMeasSemaphore.release();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         mViewTimer = new Timer();
         scheduleUITimer();
@@ -384,27 +410,6 @@ public class MainActivity extends AppCompatActivity {
      * @param view the calling view
      */
     public void export(View view) {
-        try {
-            Measurements.sMeasSemaphore.acquire();
-            if (Measurements.sData.size() > 0) {
-                // Currently used for debugging copy, conversion and mqtt publish
-                // Copying should later be done in the onSensor calculation loop
-                // And the copy pushed to a Queue with its own worker thread which does the rest
-                ArrayList<Measurement> copy = new ArrayList<>();
-                copy.add(Measurements.sData.get(0).clone());
-                copy.add(Measurements.sData.get(1).clone());
-
-                // Likely want to pass this entire process along with mqtt send into its own thread
-                Dataframe d = new Dataframe(Build.BRAND, Build.MANUFACTURER, Build.MODEL, Build.ID, Build.VERSION.RELEASE, copy);
-                String msg = JsonConverter.convert(d);
-                System.out.println(msg);
-
-                String topic = "EDR";
-                Mqtt.publish(this, mPublisher, topic, msg);
-            }
-            Measurements.sMeasSemaphore.release();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        // Unused
     }
 }
