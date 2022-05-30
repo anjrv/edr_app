@@ -9,8 +9,10 @@ public class ZipUtils {
         if (str == null || str.length() == 0) {
             return null;
         }
+
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         GZIPOutputStream gzip;
+
         try {
             gzip = new GZIPOutputStream(out);
             gzip.write(str.getBytes(StandardCharsets.UTF_8));
@@ -18,6 +20,7 @@ public class ZipUtils {
         } catch ( Exception e) {
             e.printStackTrace();
         }
+
         return out.toByteArray();
     }
 }

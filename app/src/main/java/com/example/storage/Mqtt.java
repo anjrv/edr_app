@@ -6,6 +6,7 @@ import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.IMqttToken;
 import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import info.mqtt.android.service.Ack;
@@ -18,33 +19,19 @@ public class Mqtt {
     }
 
     public static void connect(MqttAndroidClient client) {
-        IMqttToken token = client.connect();
-        token.setActionCallback(new IMqttActionListener() {
-            @Override
-            public void onSuccess(IMqttToken asyncActionToken) {
-                System.out.println("Connect success");
-            }
+        client.connect();
+    }
 
-            @Override
-            public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-                System.out.println(exception);
-            }
-        });
+    public static void connect(MqttAndroidClient client, String username, String password) {
+        MqttConnectOptions opts = new MqttConnectOptions();
+        opts.setUserName(username);
+        opts.setPassword(password.toCharArray());
+
+        client.connect(opts);
     }
 
     public static void disconnect(MqttAndroidClient client){
-        IMqttToken token = client.disconnect();
-        token.setActionCallback(new IMqttActionListener() {
-            @Override
-            public void onSuccess(IMqttToken asyncActionToken) {
-                System.out.println("Disconnect success");
-            }
-
-            @Override
-            public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-                System.out.println("Disconnect failure");
-            }
-        });
+        client.disconnect();
     }
 
     public static IMqttDeliveryToken publish(MqttAndroidClient client, String topic, byte[] msg) {
