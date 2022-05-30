@@ -14,6 +14,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -216,6 +217,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBinding = ActivityMainBinding.inflate(getLayoutInflater());
+
         View view = mBinding.getRoot();
         setContentView(view);
 
@@ -266,10 +268,12 @@ public class MainActivity extends AppCompatActivity {
         mBinding.switchBtn.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 switchToggled = true;
+                getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                 Toast.makeText(getBaseContext(), "ON", Toast.LENGTH_SHORT).show();
                 startLocationUpdates();
             } else {
                 switchToggled = false;
+                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                 if (mFusedLocationProviderClient != null)
                     mFusedLocationProviderClient.removeLocationUpdates(mLocationCallback);
             }
@@ -291,9 +295,9 @@ public class MainActivity extends AppCompatActivity {
         mViewTimer = new Timer();
         scheduleUITimer();
 
-        String server = "tcp://192.168.1.13:1883";
+        String server = "tcp://31.209.145.132:1883";
         mPublisher = Mqtt.generateClient(this, server);
-        Mqtt.connect(mPublisher, "samsung21fe", "Hvassahraun2022EDR");
+        Mqtt.connect(mPublisher, getString(R.string.mqtt_username), getString(R.string.mqtt_password));
     }
 
     @Override
