@@ -1,8 +1,14 @@
 package com.example.storage;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Dataframe {
+/**
+ * Dataframe Object for the purpose of constructing messages
+ *
+ * Getters and Setters are required for serialization
+ */
+public class Dataframe implements Serializable {
     private String brand;
     private String manufacturer;
     private String model;

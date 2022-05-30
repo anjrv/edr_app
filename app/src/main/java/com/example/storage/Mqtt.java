@@ -2,9 +2,7 @@ package com.example.storage;
 
 import android.content.Context;
 
-import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.IMqttToken;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
@@ -26,6 +24,8 @@ public class Mqtt {
         MqttConnectOptions opts = new MqttConnectOptions();
         opts.setUserName(username);
         opts.setPassword(password.toCharArray());
+        opts.setKeepAliveInterval(300);
+        opts.setAutomaticReconnect(true);
 
         client.connect(opts);
     }

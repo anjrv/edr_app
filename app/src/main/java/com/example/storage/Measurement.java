@@ -2,6 +2,9 @@ package com.example.storage;
 
 import androidx.annotation.NonNull;
 
+/**
+ * Container Object for individual moment to moment measurements
+ */
 public class Measurement implements Cloneable {
     private final double zValue;
     private double filteredZValue;

@@ -33,8 +33,6 @@ public class MessageThread extends Thread {
                     // Loop through existing stored files
                 } else {
                     // Write a file
-                    // Try reconnect
-                    Mqtt.connect(mqtt);
                 }
             } catch (Exception e) {
                 e.printStackTrace();

@@ -4,7 +4,17 @@ import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.zip.GZIPOutputStream;
 
+/**
+ * Simple container class for GZip utils
+ */
 public class ZipUtils {
+
+    /**
+     * Converts String to compressed byte array using UTF-8 charsets
+     *
+     * @param str the String to compress
+     * @return the compressed byte array
+     */
     public static byte[] compress(String str) {
         if (str == null || str.length() == 0) {
             return null;

@@ -291,9 +291,9 @@ public class MainActivity extends AppCompatActivity {
         mViewTimer = new Timer();
         scheduleUITimer();
 
-        String server = "tcp://192.168.1.6:1883";
+        String server = "tcp://192.168.1.13:1883";
         mPublisher = Mqtt.generateClient(this, server);
-        Mqtt.connect(mPublisher);
+        Mqtt.connect(mPublisher, "samsung21fe", "Hvassahraun2022EDR");
     }
 
     @Override
