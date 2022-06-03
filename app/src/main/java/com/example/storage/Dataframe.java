@@ -14,14 +14,16 @@ public class Dataframe implements Serializable {
     private String model;
     private String id;
     private String version;
+    private String session;
     private ArrayList<Measurement> data;
 
-    public Dataframe(String brand, String manufacturer, String model, String id, String version, ArrayList<Measurement> data) {
+    public Dataframe(String brand, String manufacturer, String model, String id, String version, String session, ArrayList<Measurement> data) {
         this.brand = brand;
         this.manufacturer = manufacturer;
         this.model = model;
         this.id = id;
         this.version = version;
+        this.session = session;
         this.data = data;
     }
 
@@ -63,6 +65,12 @@ public class Dataframe implements Serializable {
 
     public void setVersion(String version) {
         this.version = version;
+    }
+
+    public String getSession() { return session; }
+
+    public void setSession(String session) {
+        this.session = session;
     }
 
     public ArrayList<Measurement> getData() {

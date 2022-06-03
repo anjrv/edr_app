@@ -1,20 +1,17 @@
 <resources>
     <string name="app_name">Eddy</string>
-    <string name="get_information">Get Information</string>
-    <string name="hard_soft_info">Hardware and Software Information</string>
-    <string name="serial">SERIAL: </string>
-    <string name="model">MODEL: </string>
-    <string name="id">ID: </string>
-    <string name="manufacturer">MANUFACTURER: </string>
-    <string name="brand">BRAND: </string>
-    <string name="type">TYPE: </string>
-    <string name="user">USER: </string>
-    <string name="base">BASE: </string>
-    <string name="incremental">INCREMENTAL: </string>
-    <string name="sdk">SDK: </string>
-    <string name="board">BOARD: </string>
-    <string name="host">HOST: </string>
-    <string name="fingerprint">FINGERPRINT: </string>
-    <string name="versioncode">VERSION CODE: </string>
-
+    <string name="connection_failed">Connection: ✘</string>
+    <string name="connection_succeeded">Connection: ✔</string>
+    <string name="stop_start">Stop/Start:</string>
+    <string name="mosquitto_url">Mosquitto:</string>
+    <string name="default_ip">tcp://31.209.145.132:1883</string>
+    <string name="session">Session:</string>
+    <string name="date_and_time">Date and time:</string>
+    <string name="latitude">Latitude:</string>
+    <string name="longitude">Longitude:</string>
+    <string name="altitude">Altitude:</string>
+    <string name="speed">Speed:</string>
+    <string name="gps_accuracy">GPS Accuracy:</string>
+    <string name="z_acceleration">Z Acceleration:</string>
+    <string name="z_filtered">Z Filtered:</string>
 </resources>

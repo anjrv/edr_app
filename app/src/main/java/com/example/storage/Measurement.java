@@ -8,7 +8,7 @@ import androidx.annotation.NonNull;
 public class Measurement implements Cloneable {
     private final double zValue;
     private double filteredZValue;
-    private final long time;
+    private final String time;
     private final double longitude;
     private final double latitude;
     private final double altitude;
@@ -27,7 +27,7 @@ public class Measurement implements Cloneable {
      * @param speed The estimated speed obtained by location measurement
      * @param accuracy The percentage accuracy estimation of the location sensor during the measurement
      */
-    public Measurement(Double zValue, Double filteredZValue, Long time, Double longitude, Double latitude, Double altitude, Float speed, Float accuracy) {
+    public Measurement(Double zValue, Double filteredZValue, String time, Double longitude, Double latitude, Double altitude, Float speed, Float accuracy) {
         this.zValue = zValue;
         this.filteredZValue = filteredZValue;
         this.time = time;
@@ -46,7 +46,7 @@ public class Measurement implements Cloneable {
 
     public double getFilteredZValue() { return filteredZValue; }
 
-    public long getTime() {
+    public String getTime() {
         return time;
     }
 

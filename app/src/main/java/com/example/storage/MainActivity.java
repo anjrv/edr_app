@@ -13,6 +13,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
@@ -28,9 +30,11 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Semaphore;
@@ -63,7 +67,11 @@ public class MainActivity extends AppCompatActivity {
 
             if (switchToggled && event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
                 float zAcc = event.values[2];
-                long time = System.currentTimeMillis();
+
+                DateFormat isoDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                isoDate.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+                String time = isoDate.format(new Date());
 
                 try {
                     Measurement m = null;
@@ -186,7 +194,7 @@ public class MainActivity extends AppCompatActivity {
                                 copy.add(ms.clone());
                             }
 
-                            Dataframe d = new Dataframe(Build.BRAND, Build.MANUFACTURER, Build.MODEL, Build.ID, Build.VERSION.RELEASE, copy);
+                            Dataframe d = new Dataframe(Build.BRAND, Build.MANUFACTURER, Build.MODEL, Build.ID, Build.VERSION.RELEASE, String.valueOf(mBinding.session.getText()), copy);
                             mMessageThread.handleMessage(d, mPublisher);
 
                             Measurements.sData.clear();
@@ -279,12 +287,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        mBinding.aid.setText(Build.ID);
-        mBinding.aversioncode.setText(Build.VERSION.RELEASE);
-        mBinding.abrand.setText(Build.BRAND);
-        mBinding.amanuf.setText(Build.MANUFACTURER);
-        mBinding.amodel.setText(Build.MODEL);
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             mApproxRefresh = (int) (1000 / this.getDisplay().getRefreshRate()) + 1;
         } else {
@@ -295,9 +297,46 @@ public class MainActivity extends AppCompatActivity {
         mViewTimer = new Timer();
         scheduleUITimer();
 
-        String server = "tcp://31.209.145.132:1883";
-        mPublisher = Mqtt.generateClient(this, server);
-        Mqtt.connect(mPublisher, getString(R.string.mqtt_username), getString(R.string.mqtt_password));
+        String defaultTxt = String.valueOf(mBinding.server.getText());
+        if (defaultTxt.length() >= 7) {
+            mPublisher = Mqtt.generateClient(this, defaultTxt);
+            Mqtt.connect(mPublisher, getString(R.string.mqtt_username), getString(R.string.mqtt_password));
+        }
+
+        mBinding.session.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { /* Unused */ }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                mBinding.switchBtn.setEnabled(s.length() > 0 && mBinding.server.getText().length() >= 7);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) { /* Unused */ }
+        });
+
+        mBinding.server.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { /* Unused */ }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (s.length() >= 7) {
+                    if (mPublisher != null)
+                        Mqtt.disconnect(mPublisher);
+
+                    String server = String.valueOf(mBinding.server.getText());
+                    mPublisher = Mqtt.generateClient(getBaseContext(), server);
+                    Mqtt.connect(mPublisher, getString(R.string.mqtt_username), getString(R.string.mqtt_password));
+
+                    mBinding.switchBtn.setEnabled(mBinding.session.getText().length() > 0);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) { /* Unused */ }
+        });
     }
 
     @Override
@@ -370,6 +409,11 @@ public class MainActivity extends AppCompatActivity {
         mViewTimer.schedule(new TimerTask() {
             @Override
             public void run() {
+                // Reflect connection changes even if paused
+                runOnUiThread(() -> {
+                    mBinding.connectionLabel.setText(mPublisher.isConnected() ? getString(R.string.connection_succeeded) : getString(R.string.connection_failed));
+                });
+
                 if (switchToggled) {
                     runOnUiThread(() -> {
                         try {
@@ -393,7 +437,6 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Helper function to update on screen information with recent...ish values
      */
-    @SuppressLint("SimpleDateFormat")
     private void updateUI(Measurement m) {
         mBinding.zValue.setText((String.valueOf(m.getzValue())));
         mBinding.tvLat.setText(String.valueOf(m.getLatitude()));
@@ -401,19 +444,7 @@ public class MainActivity extends AppCompatActivity {
         mBinding.tvAccuracy.setText(String.valueOf(m.getAccuracy()));
         mBinding.tvAltitude.setText(String.valueOf(m.getAltitude()));
         mBinding.tvSpeed.setText(String.valueOf(m.getSpeed()));
-        mBinding.time
-                .setText(new SimpleDateFormat("dd MMM yyyy HH:mm")
-                        .format(new Date(m.getTime())));
-
-        mBinding.tvAddress.setText(String.valueOf(m.getFilteredZValue()));
-    }
-
-    /**
-     * Currently used as a debug test function
-     *
-     * @param view the calling view
-     */
-    public void export(View view) {
-        // Unused
+        mBinding.time.setText(m.getTime().replace('T', ' ').replace('Z', ' '));
+        mBinding.zFiltered.setText(String.valueOf(Math.max(m.getFilteredZValue(), 0.0)));
     }
 }
