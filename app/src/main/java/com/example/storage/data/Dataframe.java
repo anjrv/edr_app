@@ -1,4 +1,6 @@
-package com.example.storage;
+package com.example.storage.data;
+
+import com.example.storage.data.Measurement;
 
 import java.io.Serializable;
 import java.util.ArrayList;

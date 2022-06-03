@@ -1,4 +1,4 @@
-package com.example.storage;
+package com.example.storage.utils;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;

@@ -23,7 +23,15 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
+import com.example.storage.data.Dataframe;
+import com.example.storage.data.Measurement;
+import com.example.storage.data.Measurements;
 import com.example.storage.databinding.ActivityMainBinding;
+import com.example.storage.network.MessageThread;
+import com.example.storage.network.Mqtt;
+import com.example.storage.utils.FileUtils;
+import com.example.storage.utils.JsonConverter;
+import com.example.storage.utils.ZipUtils;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -47,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding mBinding;
     private Timer mViewTimer;
+    private Timer mBacklogTimer;
     private int mApproxRefresh;
     private volatile boolean switchToggled;
     private Location mCurrLoc; // Sensor and Location threads both need to use this
@@ -195,7 +204,7 @@ public class MainActivity extends AppCompatActivity {
                             }
 
                             Dataframe d = new Dataframe(Build.BRAND, Build.MANUFACTURER, Build.MODEL, Build.ID, Build.VERSION.RELEASE, String.valueOf(mBinding.session.getText()), copy);
-                            mMessageThread.handleMessage(d, mPublisher);
+                            mMessageThread.handleMessage(d, mPublisher, getBaseContext());
 
                             Measurements.sData.clear();
                         }
@@ -297,6 +306,9 @@ public class MainActivity extends AppCompatActivity {
         mViewTimer = new Timer();
         scheduleUITimer();
 
+        mBacklogTimer = new Timer();
+        scheduleBacklogTimer();
+
         String defaultTxt = String.valueOf(mBinding.server.getText());
         if (defaultTxt.length() >= 7) {
             mPublisher = Mqtt.generateClient(this, defaultTxt);
@@ -340,8 +352,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
+    protected void onDestroy() {
 
         if (mViewTimer != null)
             mViewTimer.cancel();
@@ -351,28 +362,77 @@ public class MainActivity extends AppCompatActivity {
 
         if (mFusedLocationProviderClient != null)
             mFusedLocationProviderClient.removeLocationUpdates(mLocationCallback);
+
+        if (mBacklogTimer != null)
+            mBacklogTimer.cancel();
+
+        if (mMessageThread != null && mMessageThread.looper != null)
+            mMessageThread.looper.quitSafely();
+
+        if (mPublisher != null) {
+            Mqtt.disconnect(mPublisher);
+            mPublisher = null;
+        }
+
+        try {
+            Measurements.sMeasSemaphore.acquire();
+
+            ArrayList<Measurement> copy = new ArrayList<>();
+            for (Measurement ms:Measurements.sData) {
+                copy.add(ms.clone());
+            }
+
+            Dataframe d = new Dataframe(Build.BRAND, Build.MANUFACTURER, Build.MODEL, Build.ID, Build.VERSION.RELEASE, String.valueOf(mBinding.session.getText()), copy);
+            String json = JsonConverter.convert(d);
+            byte[] msg = ZipUtils.compress(json);
+
+            FileUtils.write(copy.get(copy.size() - 1).getTime(), msg, this);
+
+            Measurements.sData.clear();
+            Measurements.sMeasSemaphore.release();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        if (mViewTimer != null)
+            mViewTimer.cancel();
+
+        /* Try without aggressive pausing, appears to allow at least some duration of callbacks while paused
+         if (mSensorManager != null)
+             mSensorManager.unregisterListener(mSensorEventListener);
+         if (mFusedLocationProviderClient != null)
+             mFusedLocationProviderClient.removeLocationUpdates(mLocationCallback);
+        */
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        try {
-            Measurements.sMeasSemaphore.acquire();
-            Measurements.consecutiveMeasurements = 0;
-            Measurements.sMeasSemaphore.release();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        /* Try without aggressive pausing, appears to allow at least some duration of callbacks while paused
+         try {
+             Measurements.sMeasSemaphore.acquire();
+             Measurements.consecutiveMeasurements = 0;
+             Measurements.sMeasSemaphore.release();
+         } catch (InterruptedException e) {
+             e.printStackTrace();
+         }
+
+         if (mSensorManager != null)
+             mSensorManager
+                     .registerListener(mSensorEventListener, mAccelerometer, SensorManager.SENSOR_DELAY_FASTEST);
+         startLocationUpdates();
+        */
 
         mViewTimer = new Timer();
         scheduleUITimer();
-
-        if (mSensorManager != null)
-            mSensorManager
-                    .registerListener(mSensorEventListener, mAccelerometer, SensorManager.SENSOR_DELAY_FASTEST);
-
-        startLocationUpdates();
     }
 
     @Override
@@ -399,6 +459,20 @@ public class MainActivity extends AppCompatActivity {
                     .requestLocationUpdates(mLocationRequest, mLocationCallback, mLocationLooper);
     }
 
+    private void scheduleBacklogTimer() {
+        mBacklogTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (mPublisher != null && mPublisher.isConnected()) {
+                   String[] files = FileUtils.list(getBaseContext());
+
+                   if (files != null && files.length > 0)
+                       mMessageThread.handleFile(files[0], mPublisher, getBaseContext());
+                }
+            }
+        }, 0, 60000);
+    }
+
     /**
      * Helper function to kick off screen updates to slightly slower than screen refresh
      * <p>
@@ -409,10 +483,11 @@ public class MainActivity extends AppCompatActivity {
         mViewTimer.schedule(new TimerTask() {
             @Override
             public void run() {
-                // Reflect connection changes even if paused
-                runOnUiThread(() -> {
-                    mBinding.connectionLabel.setText(mPublisher.isConnected() ? getString(R.string.connection_succeeded) : getString(R.string.connection_failed));
-                });
+                // Reflect connection changes even if not measuring
+                runOnUiThread(() -> mBinding.connectionLabel.
+                        setText(mPublisher != null && mPublisher.isConnected() ?
+                        getString(R.string.connection_succeeded) :
+                        getString(R.string.connection_failed)));
 
                 if (switchToggled) {
                     runOnUiThread(() -> {

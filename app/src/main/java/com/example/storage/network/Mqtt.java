@@ -1,4 +1,4 @@
-package com.example.storage;
+package com.example.storage.network;
 
 import android.content.Context;
 
@@ -16,15 +16,11 @@ public class Mqtt {
         return new MqttAndroidClient(c, server, clientId, Ack.AUTO_ACK);
     }
 
-    public static void connect(MqttAndroidClient client) {
-        client.connect();
-    }
-
     public static void connect(MqttAndroidClient client, String username, String password) {
         MqttConnectOptions opts = new MqttConnectOptions();
         opts.setUserName(username);
         opts.setPassword(password.toCharArray());
-        opts.setKeepAliveInterval(300);
+        opts.setKeepAliveInterval(60);
         opts.setAutomaticReconnect(true);
 
         client.connect(opts);

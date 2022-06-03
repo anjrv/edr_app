@@ -1,4 +1,4 @@
-package com.example.storage;
+package com.example.storage.data;
 
 import androidx.annotation.NonNull;
 
