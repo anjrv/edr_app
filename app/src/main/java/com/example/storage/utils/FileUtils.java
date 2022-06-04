@@ -1,13 +1,18 @@
 package com.example.storage.utils;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 
 public class FileUtils {
+    public static final String ISO_DATE = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 
     /**
      * Obtain all the filenames for the internally stored files
@@ -15,8 +20,24 @@ public class FileUtils {
      * @param c the context to list files for
      * @return an array of strings containing the names of existing files
      */
-    public static String[] list(Context c) {
-       return c.getFilesDir().list();
+    @SuppressLint("SimpleDateFormat")
+    public static ArrayList<String> list(Context c) {
+       String[] files = c.getFilesDir().list();
+       ArrayList<String> res = new ArrayList<>();
+
+       if (files != null) {
+           for (String file : files) {
+               try {
+                   DateFormat isoDate = new SimpleDateFormat(FileUtils.ISO_DATE);
+                   isoDate.parse(file); // Ensure the list we get back only has our backlog
+                   res.add(file);
+               } catch (Exception e) {
+                   // Unused
+               }
+           }
+       }
+
+       return res;
     }
 
     /**

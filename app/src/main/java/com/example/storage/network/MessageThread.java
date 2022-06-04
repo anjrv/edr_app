@@ -3,6 +3,7 @@ package com.example.storage.network;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.widget.Toast;
 
 import com.example.storage.data.Dataframe;
 import com.example.storage.utils.FileUtils;
@@ -50,8 +51,10 @@ public class MessageThread extends Thread {
                 IMqttDeliveryToken token = Mqtt.publish(mqtt, "EDR", msg);
 
                 token.waitForCompletion();
-                if (token.getException() == null)
+                if (token.getException() == null) {
                     FileUtils.delete(name, c);
+                    Toast.makeText(c, "Backlog file sent over MQTT", Toast.LENGTH_SHORT).show();
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -81,10 +84,15 @@ public class MessageThread extends Thread {
                     IMqttDeliveryToken token = Mqtt.publish(mqtt, "EDR", msg);
                     token.waitForCompletion();
 
-                    if (token.getException() != null)
+                    if (token.getException() != null) {
                         FileUtils.write(d.getData().get(d.getData().size() - 1).getTime(), msg, c);
+                        Toast.makeText(c, "Measurements written to backlog", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(c, "Measurements sent over MQTT", Toast.LENGTH_SHORT).show();
+                    }
                 } else {
                     FileUtils.write(d.getData().get(d.getData().size() - 1).getTime(), msg, c);
+                    Toast.makeText(c, "Measurements written to backlog", Toast.LENGTH_SHORT).show();
                 }
             } catch (Exception e) {
                 e.printStackTrace();

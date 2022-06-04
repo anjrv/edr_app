@@ -55,7 +55,6 @@ public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding mBinding;
     private Timer mViewTimer;
-    private Timer mBacklogTimer;
     private int mApproxRefresh;
     private volatile boolean switchToggled;
     private Location mCurrLoc; // Sensor and Location threads both need to use this
@@ -83,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
             if (switchToggled && event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
                 float zAcc = event.values[2];
 
-                DateFormat isoDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                DateFormat isoDate = new SimpleDateFormat(FileUtils.ISO_DATE);
                 isoDate.setTimeZone(TimeZone.getTimeZone("UTC"));
 
                 String time = isoDate.format(new Date());
@@ -236,6 +235,11 @@ public class MainActivity extends AppCompatActivity {
         View view = mBinding.getRoot();
         setContentView(view);
 
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_FINE_LOCATION);
+        }
+
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
@@ -282,15 +286,16 @@ public class MainActivity extends AppCompatActivity {
         switchToggled = false;
         mBinding.switchBtn.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
-                switchToggled = true;
                 getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                 Toast.makeText(getBaseContext(), "ON", Toast.LENGTH_SHORT).show();
                 startLocationUpdates();
+                switchToggled = true;
             } else {
-                switchToggled = false;
                 getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                 if (mFusedLocationProviderClient != null)
                     mFusedLocationProviderClient.removeLocationUpdates(mLocationCallback);
+
+                switchToggled = false;
             }
         });
 
@@ -304,8 +309,7 @@ public class MainActivity extends AppCompatActivity {
         mViewTimer = new Timer();
         scheduleUITimer();
 
-        mBacklogTimer = new Timer();
-        scheduleBacklogTimer();
+        scheduleBacklogs();
 
         String defaultTxt = String.valueOf(mBinding.server.getText());
         if (defaultTxt.length() >= 7) {
@@ -357,9 +361,6 @@ public class MainActivity extends AppCompatActivity {
         if (mSensorManager != null)
             mSensorManager.unregisterListener(mSensorEventListener);
 
-        if (mBacklogTimer != null)
-            mBacklogTimer.cancel();
-
         if (mMessageThread != null && mMessageThread.looper != null)
             mMessageThread.looper.quitSafely();
 
@@ -371,18 +372,21 @@ public class MainActivity extends AppCompatActivity {
         try {
             Measurements.sMeasSemaphore.acquire();
 
-            ArrayList<Measurement> copy = new ArrayList<>();
-            for (Measurement ms : Measurements.sData) {
-                copy.add(ms.clone());
+            if (Measurements.sData.size() > 0) {
+                ArrayList<Measurement> copy = new ArrayList<>();
+                for (Measurement ms : Measurements.sData) {
+                    copy.add(ms.clone());
+                }
+
+                Dataframe d = new Dataframe(Build.BRAND, Build.MANUFACTURER, Build.MODEL, Build.ID, Build.VERSION.RELEASE, String.valueOf(mBinding.session.getText()), copy);
+                String json = JsonConverter.convert(d);
+                byte[] msg = ZipUtils.compress(json);
+
+                FileUtils.write(copy.get(copy.size() - 1).getTime(), msg, this);
+
+                Measurements.sData.clear();
             }
 
-            Dataframe d = new Dataframe(Build.BRAND, Build.MANUFACTURER, Build.MODEL, Build.ID, Build.VERSION.RELEASE, String.valueOf(mBinding.session.getText()), copy);
-            String json = JsonConverter.convert(d);
-            byte[] msg = ZipUtils.compress(json);
-
-            FileUtils.write(copy.get(copy.size() - 1).getTime(), msg, this);
-
-            Measurements.sData.clear();
             Measurements.sMeasSemaphore.release();
         } catch (Exception e) {
             e.printStackTrace();
@@ -464,22 +468,29 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Schedules a timer to queue internally stored measurement data
+     * Creates a looper handler to add backlogged message data to the MessageThread
      * <p>
-     * Currently sent to enqueue a fine once a minute if one exists in storage
+     * Currently backlog files are enqueued once a minute if measurements are ongoing
+     * or once every 20 seconds if measurements are paused
      */
-    private void scheduleBacklogTimer() {
-        mBacklogTimer.schedule(new TimerTask() {
+    @SuppressLint("SimpleDateFormat")
+    private void scheduleBacklogs() {
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.post(new Runnable() {
             @Override
             public void run() {
                 if (mPublisher != null && mPublisher.isConnected()) {
-                    String[] files = FileUtils.list(getBaseContext());
+                    ArrayList<String> files = FileUtils.list(getBaseContext());
 
-                    if (files != null && files.length > 0)
-                        mMessageThread.handleFile(files[0], mPublisher, getBaseContext());
+                    if (files.size() > 0) {
+                        mMessageThread.handleFile(files.get(0), mPublisher, getBaseContext());
+                    }
                 }
+
+                // Queue more messages if MessageThread isn't being used
+                handler.postDelayed(this, switchToggled ? 60000 : 20000);
             }
-        }, 0, 60000);
+        });
     }
 
     /**
