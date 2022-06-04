@@ -1,15 +1,14 @@
 package com.example.storage.data;
 
-import com.example.storage.data.Measurement;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  * Dataframe Object for the purpose of constructing messages
- *
+ * <p>
  * Getters and Setters are required for serialization
  */
+@SuppressWarnings("unused") // The getters and setters are used for JSON conversion
 public class Dataframe implements Serializable {
     private String brand;
     private String manufacturer;
@@ -69,7 +68,9 @@ public class Dataframe implements Serializable {
         this.version = version;
     }
 
-    public String getSession() { return session; }
+    public String getSession() {
+        return session;
+    }
 
     public void setSession(String session) {
         this.session = session;

@@ -27,7 +27,7 @@ public class ZipUtils {
             gzip = new GZIPOutputStream(out);
             gzip.write(str.getBytes(StandardCharsets.UTF_8));
             gzip.close();
-        } catch ( Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

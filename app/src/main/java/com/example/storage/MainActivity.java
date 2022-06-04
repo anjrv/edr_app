@@ -61,7 +61,13 @@ public class MainActivity extends AppCompatActivity {
     private Location mCurrLoc; // Sensor and Location threads both need to use this
 
     private MqttAndroidClient mPublisher;
-
+    private FusedLocationProviderClient mFusedLocationProviderClient;
+    private LocationRequest mLocationRequest;
+    private LocationCallback mLocationCallback;
+    private Looper mLocationLooper;
+    private SensorManager mSensorManager;
+    private Sensor mAccelerometer;
+    private MessageThread mMessageThread;
     /**
      * Listener for accelerometer events
      * <p>
@@ -199,7 +205,7 @@ public class MainActivity extends AppCompatActivity {
                         if (Measurements.sData.size() >= 10000) {
                             ArrayList<Measurement> copy = new ArrayList<>();
 
-                            for (Measurement ms:Measurements.sData) {
+                            for (Measurement ms : Measurements.sData) {
                                 copy.add(ms.clone());
                             }
 
@@ -221,14 +227,6 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onAccuracyChanged(Sensor sensor, int i) { /* Unused */ }
     };
-
-    private FusedLocationProviderClient mFusedLocationProviderClient;
-    private LocationRequest mLocationRequest;
-    private LocationCallback mLocationCallback;
-    private Looper mLocationLooper;
-    private SensorManager mSensorManager;
-    private Sensor mAccelerometer;
-    private MessageThread mMessageThread;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -352,16 +350,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onDestroy() {
-
-        if (mViewTimer != null)
-            mViewTimer.cancel();
+    protected void onStop() {
+        if (mFusedLocationProviderClient != null)
+            mFusedLocationProviderClient.removeLocationUpdates(mLocationCallback);
 
         if (mSensorManager != null)
             mSensorManager.unregisterListener(mSensorEventListener);
-
-        if (mFusedLocationProviderClient != null)
-            mFusedLocationProviderClient.removeLocationUpdates(mLocationCallback);
 
         if (mBacklogTimer != null)
             mBacklogTimer.cancel();
@@ -378,7 +372,7 @@ public class MainActivity extends AppCompatActivity {
             Measurements.sMeasSemaphore.acquire();
 
             ArrayList<Measurement> copy = new ArrayList<>();
-            for (Measurement ms:Measurements.sData) {
+            for (Measurement ms : Measurements.sData) {
                 copy.add(ms.clone());
             }
 
@@ -394,13 +388,11 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        super.onDestroy();
+        super.onStop();
     }
 
     @Override
     protected void onPause() {
-        super.onPause();
-
         if (mViewTimer != null)
             mViewTimer.cancel();
 
@@ -410,6 +402,8 @@ public class MainActivity extends AppCompatActivity {
          if (mFusedLocationProviderClient != null)
              mFusedLocationProviderClient.removeLocationUpdates(mLocationCallback);
         */
+
+        super.onPause();
     }
 
     @Override
@@ -446,6 +440,16 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Checks for location permission
+     * <p>
+     * If permissions are granted then it ensures there is a location provider client
+     * <p>
+     * Once a client exists requests location updates using:
+     * mLocationRequest,
+     * mLocationCallback,
+     * mLocationLooper
+     */
     private void startLocationUpdates() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -459,15 +463,20 @@ public class MainActivity extends AppCompatActivity {
                     .requestLocationUpdates(mLocationRequest, mLocationCallback, mLocationLooper);
     }
 
+    /**
+     * Schedules a timer to queue internally stored measurement data
+     * <p>
+     * Currently sent to enqueue a fine once a minute if one exists in storage
+     */
     private void scheduleBacklogTimer() {
         mBacklogTimer.schedule(new TimerTask() {
             @Override
             public void run() {
                 if (mPublisher != null && mPublisher.isConnected()) {
-                   String[] files = FileUtils.list(getBaseContext());
+                    String[] files = FileUtils.list(getBaseContext());
 
-                   if (files != null && files.length > 0)
-                       mMessageThread.handleFile(files[0], mPublisher, getBaseContext());
+                    if (files != null && files.length > 0)
+                        mMessageThread.handleFile(files[0], mPublisher, getBaseContext());
                 }
             }
         }, 0, 60000);
@@ -486,8 +495,8 @@ public class MainActivity extends AppCompatActivity {
                 // Reflect connection changes even if not measuring
                 runOnUiThread(() -> mBinding.connectionLabel.
                         setText(mPublisher != null && mPublisher.isConnected() ?
-                        getString(R.string.connection_succeeded) :
-                        getString(R.string.connection_failed)));
+                                getString(R.string.connection_succeeded) :
+                                getString(R.string.connection_failed)));
 
                 if (switchToggled) {
                     runOnUiThread(() -> {
@@ -510,7 +519,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Helper function to update on screen information with recent...ish values
+     * Updates on screen information with recent values
      */
     private void updateUI(Measurement m) {
         mBinding.zValue.setText((String.valueOf(m.getzValue())));

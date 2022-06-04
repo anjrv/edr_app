@@ -1,13 +1,11 @@
 package com.example.storage.data;
 
-import com.example.storage.data.Measurement;
-
 import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
 
 /**
  * Storage wrapper for measurements
- *
+ * <p>
  * This is necessary to ensure that measurement memory is static with app life time
  * and is not lost with a forced application pause
  */

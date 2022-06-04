@@ -7,25 +7,25 @@ import androidx.annotation.NonNull;
  */
 public class Measurement implements Cloneable {
     private final double zValue;
-    private double filteredZValue;
     private final String time;
     private final double longitude;
     private final double latitude;
     private final double altitude;
     private final float speed;
     private final float accuracy;
+    private double filteredZValue;
 
     /**
      * Container class for storing moment to moment measurements
      *
-     * @param zValue The z Acceleration value read from the sensor
+     * @param zValue         The z Acceleration value read from the sensor
      * @param filteredZValue The four section filter z value result
-     * @param time Time of measurement in UTC milliseconds
-     * @param longitude The longitude obtained by location measurement
-     * @param latitude The latitude obtained by location measurement
-     * @param altitude The altitude obtained by location measurement
-     * @param speed The estimated speed obtained by location measurement
-     * @param accuracy The percentage accuracy estimation of the location sensor during the measurement
+     * @param time           Time of measurement in UTC milliseconds
+     * @param longitude      The longitude obtained by location measurement
+     * @param latitude       The latitude obtained by location measurement
+     * @param altitude       The altitude obtained by location measurement
+     * @param speed          The estimated speed obtained by location measurement
+     * @param accuracy       The percentage accuracy estimation of the location sensor during the measurement
      */
     public Measurement(Double zValue, Double filteredZValue, String time, Double longitude, Double latitude, Double altitude, Float speed, Float accuracy) {
         this.zValue = zValue;
@@ -42,9 +42,13 @@ public class Measurement implements Cloneable {
         return zValue;
     }
 
-    public void setFilteredZValue(Double filteredZValue) { this.filteredZValue = filteredZValue; }
+    public double getFilteredZValue() {
+        return filteredZValue;
+    }
 
-    public double getFilteredZValue() { return filteredZValue; }
+    public void setFilteredZValue(Double filteredZValue) {
+        this.filteredZValue = filteredZValue;
+    }
 
     public String getTime() {
         return time;

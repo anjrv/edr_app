@@ -10,12 +10,30 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import info.mqtt.android.service.Ack;
 import info.mqtt.android.service.MqttAndroidClient;
 
+/**
+ * Wrapper class to provide configuration for the paho MQTT methods
+ */
 public class Mqtt {
+
+    /**
+     * Generate a new MQTT client
+     *
+     * @param c      The context to provide for the MQTT client
+     * @param server The server IP to attempt to connect to
+     * @return The constructed client object
+     */
     public static MqttAndroidClient generateClient(Context c, String server) {
         String clientId = MqttClient.generateClientId();
         return new MqttAndroidClient(c, server, clientId, Ack.AUTO_ACK);
     }
 
+    /**
+     * Attempt to establish and retain a connection for the given client
+     *
+     * @param client   The client to use for the connection
+     * @param username The MOSQUITTO username to use
+     * @param password The MOSQUITTO password to use
+     */
     public static void connect(MqttAndroidClient client, String username, String password) {
         MqttConnectOptions opts = new MqttConnectOptions();
         opts.setUserName(username);
@@ -26,10 +44,23 @@ public class Mqtt {
         client.connect(opts);
     }
 
-    public static void disconnect(MqttAndroidClient client){
+    /**
+     * Disconnect the given client
+     *
+     * @param client The client to disconnect
+     */
+    public static void disconnect(MqttAndroidClient client) {
         client.disconnect();
     }
 
+    /**
+     * Publish data to the connected MQTT broker
+     *
+     * @param client The client to use to publish with
+     * @param topic  The topic to use for the payload
+     * @param msg    The data to use for the payload
+     * @return the MQTT delivery token for the transaction
+     */
     public static IMqttDeliveryToken publish(MqttAndroidClient client, String topic, byte[] msg) {
         MqttMessage message = new MqttMessage();
         message.setPayload(msg);

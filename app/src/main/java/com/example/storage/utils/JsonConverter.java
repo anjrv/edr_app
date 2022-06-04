@@ -14,7 +14,7 @@ public class JsonConverter {
      *
      * @param o the object to be converted to JSON
      * @return the JSON string representation of the object
-     * @throws JsonProcessingException
+     * @throws JsonProcessingException error object for write failure
      */
     public static String convert(Object o) throws JsonProcessingException {
         ObjectWriter writer = new ObjectMapper().writer().withDefaultPrettyPrinter();
