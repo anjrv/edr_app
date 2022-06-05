@@ -203,16 +203,7 @@ public class MainActivity extends AppCompatActivity {
                         Measurements.consecutiveMeasurements++;
 
                         if (Measurements.sData.size() >= 10000) {
-                            ArrayList<Measurement> copy = new ArrayList<>();
-
-                            for (Measurement ms : Measurements.sData) {
-                                copy.add(ms.clone());
-                            }
-
-                            Dataframe d = new Dataframe(Build.BRAND, Build.MANUFACTURER, Build.MODEL, Build.ID, Build.VERSION.RELEASE, String.valueOf(mBinding.session.getText()), copy);
-                            mMessageThread.handleMessage(d, mPublisher, getBaseContext());
-
-                            Measurements.sData.clear();
+                            flushMessages();
                         }
 
                         Measurements.sData.add(m);
@@ -228,6 +219,28 @@ public class MainActivity extends AppCompatActivity {
         public void onAccuracyChanged(Sensor sensor, int i) { /* Unused */ }
     };
     private PowerManager.WakeLock mWakeLock;
+
+    /**
+     * Send the currently stored messages to the message thread handler
+     * <p>
+     * NOTE: You must obtain the Measurements semaphore when calling this method!
+     */
+    private void flushMessages() {
+        ArrayList<Measurement> copy = new ArrayList<>();
+
+        for (Measurement ms : Measurements.sData) {
+            try {
+                copy.add(ms.clone());
+            } catch (CloneNotSupportedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        Dataframe d = new Dataframe(Build.BRAND, Build.MANUFACTURER, Build.MODEL, Build.ID, Build.VERSION.RELEASE, String.valueOf(mBinding.session.getText()), copy);
+        mMessageThread.handleMessage(d, mPublisher, getBaseContext());
+
+        Measurements.sData.clear();
+    }
 
     @SuppressLint("WakelockTimeout")
     @Override
@@ -302,8 +315,12 @@ public class MainActivity extends AppCompatActivity {
                 else
                     getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-                Toast.makeText(getBaseContext(), "ON", Toast.LENGTH_SHORT).show();
                 startLocationUpdates();
+
+                if (mSensorManager != null)
+                    mSensorManager
+                            .registerListener(mSensorEventListener, mAccelerometer, SensorManager.SENSOR_DELAY_FASTEST);
+
                 switchToggled = true;
             } else {
                 if (mWakeLock != null)
@@ -313,6 +330,22 @@ public class MainActivity extends AppCompatActivity {
 
                 if (mFusedLocationProviderClient != null)
                     mFusedLocationProviderClient.removeLocationUpdates(mLocationCallback);
+
+                if (mSensorManager != null)
+                    mSensorManager.unregisterListener(mSensorEventListener);
+
+                try {
+                    Measurements.sMeasSemaphore.acquire();
+
+                    Measurements.consecutiveMeasurements = 0;
+                    if (Measurements.sData.size() > 0) {
+                        flushMessages();
+                    }
+
+                    Measurements.sMeasSemaphore.release();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
                 switchToggled = false;
             }
@@ -427,11 +460,14 @@ public class MainActivity extends AppCompatActivity {
             mMessageThread.start();
         }
 
-        if (mSensorManager != null)
-            mSensorManager
-                    .registerListener(mSensorEventListener, mAccelerometer, SensorManager.SENSOR_DELAY_FASTEST);
+        if (switchToggled) {
+            if (mSensorManager != null)
+                mSensorManager
+                        .registerListener(mSensorEventListener, mAccelerometer, SensorManager.SENSOR_DELAY_FASTEST);
 
-        startLocationUpdates();
+            startLocationUpdates();
+        }
+
 
         mViewTimer = new Timer();
         scheduleUITimer();
