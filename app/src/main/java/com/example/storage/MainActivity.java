@@ -1,5 +1,7 @@
 package com.example.storage;
 
+import static android.os.PowerManager.PARTIAL_WAKE_LOCK;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
@@ -13,6 +15,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
+import android.os.PowerManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -226,7 +229,9 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onAccuracyChanged(Sensor sensor, int i) { /* Unused */ }
     };
+    private PowerManager.WakeLock mWakeLock;
 
+    @SuppressLint("WakelockTimeout")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -240,11 +245,18 @@ public class MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_FINE_LOCATION);
         }
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            PowerManager powerManager = (PowerManager) this.getSystemService(POWER_SERVICE);
+            mWakeLock = powerManager.newWakeLock(PARTIAL_WAKE_LOCK, "motionDetection:keepAwake");
+        }
+
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
         // Thread looper to be used for accelerometer callbacks
         new Thread(() -> {
+            Thread.currentThread().setPriority(8); // Relatively high priority
+
             Looper.prepare();
             Handler sensorHandler = new Handler(Looper.myLooper());
             mSensorManager
@@ -286,12 +298,20 @@ public class MainActivity extends AppCompatActivity {
         switchToggled = false;
         mBinding.switchBtn.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
-                getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                if (mWakeLock != null)
+                    mWakeLock.acquire();
+                else
+                    getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
                 Toast.makeText(getBaseContext(), "ON", Toast.LENGTH_SHORT).show();
                 startLocationUpdates();
                 switchToggled = true;
             } else {
-                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                if (mWakeLock != null)
+                    mWakeLock.release();
+                else
+                    getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
                 if (mFusedLocationProviderClient != null)
                     mFusedLocationProviderClient.removeLocationUpdates(mLocationCallback);
 
@@ -355,44 +375,67 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onStop() {
-        if (mFusedLocationProviderClient != null)
-            mFusedLocationProviderClient.removeLocationUpdates(mLocationCallback);
-
-        if (mSensorManager != null)
-            mSensorManager.unregisterListener(mSensorEventListener);
-
-        if (mMessageThread != null && mMessageThread.looper != null)
-            mMessageThread.looper.quitSafely();
-
-        if (mPublisher != null) {
-            Mqtt.disconnect(mPublisher);
-            mPublisher = null;
-        }
-
-        try {
-            Measurements.sMeasSemaphore.acquire();
-
-            if (Measurements.sData.size() > 0) {
-                ArrayList<Measurement> copy = new ArrayList<>();
-                for (Measurement ms : Measurements.sData) {
-                    copy.add(ms.clone());
-                }
-
-                Dataframe d = new Dataframe(Build.BRAND, Build.MANUFACTURER, Build.MODEL, Build.ID, Build.VERSION.RELEASE, String.valueOf(mBinding.session.getText()), copy);
-                String json = JsonConverter.convert(d);
-                byte[] msg = ZipUtils.compress(json);
-
-                FileUtils.write(copy.get(copy.size() - 1).getTime(), msg, this);
-
-                Measurements.sData.clear();
-            }
-
-            Measurements.sMeasSemaphore.release();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        /*
+         if (mFusedLocationProviderClient != null)
+             mFusedLocationProviderClient.removeLocationUpdates(mLocationCallback);
+         if (mSensorManager != null)
+             mSensorManager.unregisterListener(mSensorEventListener);
+         if (mMessageThread != null && mMessageThread.looper != null) {
+             mMessageThread.looper.quitSafely();
+             mMessageThread = null;
+         }
+         if (mPublisher != null) {
+             Mqtt.disconnect(mPublisher);
+             mPublisher = null;
+         }
+         try {
+             Measurements.sMeasSemaphore.acquire();
+             Measurements.consecutiveMeasurements = 0;
+             if (Measurements.sData.size() > 0) {
+                 ArrayList<Measurement> copy = new ArrayList<>();
+                 for (Measurement ms : Measurements.sData) {
+                     copy.add(ms.clone());
+                 }
+                 Dataframe d = new Dataframe(Build.BRAND, Build.MANUFACTURER, Build.MODEL, Build.ID, Build.VERSION.RELEASE, String.valueOf(mBinding.session.getText()), copy);
+                 String json = JsonConverter.convert(d);
+                 byte[] msg = ZipUtils.compress(json);
+                 FileUtils.write(copy.get(copy.size() - 1).getTime(), msg, this);
+                 Measurements.sData.clear();
+             }
+             Measurements.sMeasSemaphore.release();
+         } catch (Exception e) {
+             e.printStackTrace();
+         }
+        */
 
         super.onStop();
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+
+        if (mPublisher == null) {
+            String defaultTxt = String.valueOf(mBinding.server.getText());
+            if (defaultTxt.length() >= 7) {
+                mPublisher = Mqtt.generateClient(this, defaultTxt);
+                Mqtt.connect(mPublisher, getString(R.string.mqtt_username), getString(R.string.mqtt_password));
+            }
+        }
+
+        if (mMessageThread == null) {
+            mMessageThread = new MessageThread();
+            mMessageThread.start();
+        }
+
+        if (mSensorManager != null)
+            mSensorManager
+                    .registerListener(mSensorEventListener, mAccelerometer, SensorManager.SENSOR_DELAY_FASTEST);
+
+        startLocationUpdates();
+
+        mViewTimer = new Timer();
+        scheduleUITimer();
     }
 
     @Override
@@ -400,38 +443,18 @@ public class MainActivity extends AppCompatActivity {
         if (mViewTimer != null)
             mViewTimer.cancel();
 
-        /* Try without aggressive pausing, appears to allow at least some duration of callbacks while paused
-         if (mSensorManager != null)
-             mSensorManager.unregisterListener(mSensorEventListener);
-         if (mFusedLocationProviderClient != null)
-             mFusedLocationProviderClient.removeLocationUpdates(mLocationCallback);
-        */
-
         super.onPause();
     }
 
     @Override
     protected void onResume() {
-        super.onResume();
+       super.onResume();
 
-        /* Try without aggressive pausing, appears to allow at least some duration of callbacks while paused
-         try {
-             Measurements.sMeasSemaphore.acquire();
-             Measurements.consecutiveMeasurements = 0;
-             Measurements.sMeasSemaphore.release();
-         } catch (InterruptedException e) {
-             e.printStackTrace();
-         }
-
-         if (mSensorManager != null)
-             mSensorManager
-                     .registerListener(mSensorEventListener, mAccelerometer, SensorManager.SENSOR_DELAY_FASTEST);
-         startLocationUpdates();
-        */
-
-        mViewTimer = new Timer();
-        scheduleUITimer();
+       mViewTimer = new Timer();
+       scheduleUITimer();
     }
+
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -482,7 +505,7 @@ public class MainActivity extends AppCompatActivity {
                 if (mPublisher != null && mPublisher.isConnected()) {
                     ArrayList<String> files = FileUtils.list(getBaseContext());
 
-                    if (files.size() > 0) {
+                    if (mMessageThread != null && files.size() > 0) {
                         mMessageThread.handleFile(files.get(0), mPublisher, getBaseContext());
                     }
                 }
