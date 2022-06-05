@@ -243,6 +243,7 @@ public class MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_FINE_LOCATION);
         }
 
+        mWakeLock = null;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             PowerManager powerManager = (PowerManager) this.getSystemService(POWER_SERVICE);
             mWakeLock = powerManager.newWakeLock(PARTIAL_WAKE_LOCK, "motionDetection:keepAwake");
@@ -327,13 +328,13 @@ public class MainActivity extends AppCompatActivity {
         mViewTimer = new Timer();
         scheduleUITimer();
 
-        scheduleBacklogs();
-
         String defaultTxt = String.valueOf(mBinding.server.getText());
         if (defaultTxt.length() >= 7) {
             mPublisher = Mqtt.generateClient(this, defaultTxt);
             Mqtt.connect(mPublisher, getString(R.string.mqtt_username), getString(R.string.mqtt_password));
         }
+
+        scheduleBacklogs();
 
         mBinding.session.addTextChangedListener(new TextWatcher() {
             @Override

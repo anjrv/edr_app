@@ -1,6 +1,7 @@
 package com.example.storage.network;
 
 import android.content.Context;
+import android.os.Build;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttClient;
@@ -23,7 +24,7 @@ public class Mqtt {
      * @return The constructed client object
      */
     public static MqttAndroidClient generateClient(Context c, String server) {
-        String clientId = MqttClient.generateClientId();
+        String clientId = Build.BRAND + "_" + Build.ID;
         return new MqttAndroidClient(c, server, clientId, Ack.AUTO_ACK);
     }
 
