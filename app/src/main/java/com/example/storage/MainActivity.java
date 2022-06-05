@@ -33,8 +33,6 @@ import com.example.storage.databinding.ActivityMainBinding;
 import com.example.storage.network.MessageThread;
 import com.example.storage.network.Mqtt;
 import com.example.storage.utils.FileUtils;
-import com.example.storage.utils.JsonConverter;
-import com.example.storage.utils.ZipUtils;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -448,12 +446,11 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-       super.onResume();
+        super.onResume();
 
-       mViewTimer = new Timer();
-       scheduleUITimer();
+        mViewTimer = new Timer();
+        scheduleUITimer();
     }
-
 
 
     @Override
