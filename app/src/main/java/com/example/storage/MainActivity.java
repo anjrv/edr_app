@@ -18,6 +18,7 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Patterns;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
@@ -39,6 +40,8 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 
+import org.apache.commons.validator.routines.InetAddressValidator;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -51,6 +54,7 @@ import java.util.concurrent.Semaphore;
 import info.mqtt.android.service.MqttAndroidClient;
 
 public class MainActivity extends AppCompatActivity {
+    private final InetAddressValidator mInetAddressValidator = InetAddressValidator.getInstance();
     private final Semaphore mLocSemaphore = new Semaphore(1, true);
     private final int PERMISSION_FINE_LOCATION = 99;
 
@@ -361,8 +365,8 @@ public class MainActivity extends AppCompatActivity {
         mViewTimer = new Timer();
         scheduleUITimer();
 
-        String defaultTxt = String.valueOf(mBinding.server.getText());
-        if (defaultTxt.length() >= 7) {
+        String defaultTxt = String.valueOf(mBinding.server.getText()).replaceAll(" ", "");
+        if (defaultTxt.length() >= 7 && mInetAddressValidator.isValid(defaultTxt)) {
             mPublisher = Mqtt.generateClient(this, defaultTxt);
             Mqtt.connect(mPublisher, getString(R.string.mqtt_username), getString(R.string.mqtt_password));
         }
@@ -389,14 +393,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (s.length() >= 7) {
-                    if (mPublisher != null)
-                        Mqtt.disconnect(mPublisher);
+                    String server = String.valueOf(mBinding.server.getText()).replaceAll(" ", "");
+                    if (mInetAddressValidator.isValid(defaultTxt)) {
+                        mPublisher = Mqtt.generateClient(getBaseContext(), server);
+                        Mqtt.connect(mPublisher, getString(R.string.mqtt_username), getString(R.string.mqtt_password));
 
-                    String server = String.valueOf(mBinding.server.getText());
-                    mPublisher = Mqtt.generateClient(getBaseContext(), server);
-                    Mqtt.connect(mPublisher, getString(R.string.mqtt_username), getString(R.string.mqtt_password));
-
-                    mBinding.switchBtn.setEnabled(mBinding.session.getText().length() > 0);
+                        mBinding.switchBtn.setEnabled(mBinding.session.getText().length() > 0);
+                    }
                 }
             }
 
@@ -448,8 +451,8 @@ public class MainActivity extends AppCompatActivity {
         super.onRestart();
 
         if (mPublisher == null) {
-            String defaultTxt = String.valueOf(mBinding.server.getText());
-            if (defaultTxt.length() >= 7) {
+            String defaultTxt = String.valueOf(mBinding.server.getText()).replaceAll(" ", "");
+            if (defaultTxt.length() >= 7 && mInetAddressValidator.isValid(defaultTxt)) {
                 mPublisher = Mqtt.generateClient(this, defaultTxt);
                 Mqtt.connect(mPublisher, getString(R.string.mqtt_username), getString(R.string.mqtt_password));
             }

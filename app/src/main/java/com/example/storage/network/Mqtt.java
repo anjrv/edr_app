@@ -25,7 +25,7 @@ public class Mqtt {
      */
     public static MqttAndroidClient generateClient(Context c, String server) {
         String clientId = Build.BRAND + "_" + Build.ID;
-        return new MqttAndroidClient(c, server, clientId, Ack.AUTO_ACK);
+        return new MqttAndroidClient(c, "tcp://" + server + ":1883", clientId, Ack.AUTO_ACK);
     }
 
     /**
