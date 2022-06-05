@@ -259,7 +259,7 @@ public class MainActivity extends AppCompatActivity {
         mWakeLock = null;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             PowerManager powerManager = (PowerManager) this.getSystemService(POWER_SERVICE);
-            mWakeLock = powerManager.newWakeLock(PARTIAL_WAKE_LOCK, "motionDetection:keepAwake");
+            mWakeLock = powerManager.newWakeLock(PARTIAL_WAKE_LOCK, "edr:processingWakeLock");
         }
 
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
