@@ -15,6 +15,7 @@ import info.mqtt.android.service.MqttAndroidClient;
  * Wrapper class to provide configuration for the paho MQTT methods
  */
 public class Mqtt {
+    public static final int TIMEOUT = 5;
 
     /**
      * Generate a new MQTT client
@@ -40,7 +41,7 @@ public class Mqtt {
         opts.setUserName(username);
         opts.setPassword(password.toCharArray());
         opts.setKeepAliveInterval(30);
-        opts.setConnectionTimeout(5);
+        opts.setConnectionTimeout(TIMEOUT);
         opts.setAutomaticReconnect(true);
 
         client.connect(opts);

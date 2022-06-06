@@ -49,7 +49,7 @@ public class MessageThread extends Thread {
             try {
                 byte[] msg = FileUtils.retrieve(name, c);
                 IMqttDeliveryToken token = Mqtt.publish(mqtt, "EDR", msg);
-                token.waitForCompletion(5);
+                token.waitForCompletion(Mqtt.TIMEOUT);
 
                 if (token.getException() == null) {
                     FileUtils.delete(name, c);
@@ -82,7 +82,7 @@ public class MessageThread extends Thread {
 
                 if (hasConnection) {
                     IMqttDeliveryToken token = Mqtt.publish(mqtt, "EDR", msg);
-                    token.waitForCompletion(5);
+                    token.waitForCompletion(Mqtt.TIMEOUT);
 
                     if (token.getException() != null) {
                         FileUtils.write(d.getData().get(d.getData().size() - 1).getTime(), msg, c);
