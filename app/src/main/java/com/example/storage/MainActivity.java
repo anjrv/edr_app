@@ -350,10 +350,10 @@ public class MainActivity extends AppCompatActivity {
         });
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            mApproxRefresh = (int) (1000 / this.getDisplay().getRefreshRate());
+            mApproxRefresh = (int) (1000 / this.getDisplay().getRefreshRate()) + 1;
         } else {
-            // Assume 60fps ish, rounded up to not kick off vsync errors
-            mApproxRefresh = 16;
+            // Assume 60fps ish, rounded up
+            mApproxRefresh = 17;
         }
 
         mViewTimer = new Timer();
