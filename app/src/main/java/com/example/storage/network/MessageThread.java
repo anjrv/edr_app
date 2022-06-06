@@ -9,6 +9,7 @@ import com.example.storage.data.Dataframe;
 import com.example.storage.utils.FileUtils;
 import com.example.storage.utils.JsonConverter;
 import com.example.storage.utils.ZipUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 
@@ -52,8 +53,7 @@ public class MessageThread extends Thread {
             if (!mqtt.isConnected()) return; // Misfired request, do nothing
 
             try {
-                byte[] msg = FileUtils.retrieve(name, c);
-                IMqttDeliveryToken token = Mqtt.publish(mqtt, "EDR", msg);
+                IMqttDeliveryToken token = Mqtt.publish(mqtt, "EDR", FileUtils.retrieve(name, c));
                 token.waitForCompletion(Mqtt.TIMEOUT);
 
                 if (token.getException() == null) {
@@ -79,13 +79,10 @@ public class MessageThread extends Thread {
      */
     public void handleMessage(Dataframe d, MqttAndroidClient mqtt, Context c) {
         handler.post(() -> {
-            boolean hasConnection = mqtt.isConnected();
-
             try {
-                String json = JsonConverter.convert(d);
-                byte[] msg = ZipUtils.compress(json);
+                final byte[] msg = ZipUtils.compress(JsonConverter.convert(d));
 
-                if (hasConnection) {
+                if (mqtt.isConnected()) {
                     IMqttDeliveryToken token = Mqtt.publish(mqtt, "EDR", msg);
 
                     try {
@@ -96,13 +93,13 @@ public class MessageThread extends Thread {
                         } else {
                             Toast.makeText(c, "Measurements sent over MQTT", Toast.LENGTH_SHORT).show();
                         }
-                    } catch (Exception e){
+                    } catch (Exception e) {
                         writeMsg(d.getData().get(d.getData().size() - 1).getTime(), msg, c);
                     }
                 } else {
                     writeMsg(d.getData().get(d.getData().size() - 1).getTime(), msg, c);
                 }
-            } catch (Exception e) {
+            } catch (JsonProcessingException e) {
                 e.printStackTrace();
             }
         });

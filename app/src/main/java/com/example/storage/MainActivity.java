@@ -18,7 +18,6 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 
@@ -391,6 +390,7 @@ public class MainActivity extends AppCompatActivity {
                     String server = String.valueOf(mBinding.server.getText()).replaceAll(" ", "");
                     if (mInetAddressValidator.isValid(defaultTxt)) {
                         mPublisher = Mqtt.generateClient(getBaseContext(), server);
+                        // Mqtt will kick off old connection by itself if this is a duplicate
                         Mqtt.connect(mPublisher, getString(R.string.mqtt_username), getString(R.string.mqtt_password));
 
                         mBinding.switchBtn.setEnabled(mBinding.session.getText().length() > 0);
