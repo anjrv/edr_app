@@ -14,11 +14,11 @@ public class Measurements {
 
     public static int consecutiveMeasurements = 0;
 
-    public static Double[] zVal = new Double[3];
-    public static Double[] z = new Double[3];
-    public static Double[] x = new Double[3];
-    public static Double[] y = new Double[3];
-    public static Double[] w = new Double[3];
+    public static final Double[] zVal = new Double[3];
+    public static final Double[] z = new Double[3];
+    public static final Double[] x = new Double[3];
+    public static final Double[] y = new Double[3];
+    public static final Double[] w = new Double[3];
 
-    public static ArrayList<Measurement> sData = new ArrayList<>();
+    public static final ArrayList<Measurement> sData = new ArrayList<>();
 }

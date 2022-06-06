@@ -6,72 +6,72 @@ import androidx.annotation.NonNull;
  * Container Object for individual moment to moment measurements
  */
 public class Measurement implements Cloneable {
-    private final double zValue;
     private final String time;
-    private final double longitude;
-    private final double latitude;
-    private final double altitude;
-    private final float speed;
-    private final float accuracy;
-    private double filteredZValue;
+    private final float lon;
+    private final float lat;
+    private final float alt;
+    private final float ms;
+    private final float acc;
+    private final double z;
+    private double fz;
 
     /**
      * Container class for storing moment to moment measurements
      *
-     * @param zValue         The z Acceleration value read from the sensor
-     * @param filteredZValue The four section filter z value result
-     * @param time           Time of measurement in UTC milliseconds
-     * @param longitude      The longitude obtained by location measurement
-     * @param latitude       The latitude obtained by location measurement
-     * @param altitude       The altitude obtained by location measurement
-     * @param speed          The estimated speed obtained by location measurement
-     * @param accuracy       The percentage accuracy estimation of the location sensor during the measurement
+     * @param z     The z Acceleration value read from the sensor
+     * @param fz    The four section filter z value result
+     * @param time  Time of measurement in UTC milliseconds
+     * @param lon   The longitude obtained by location measurement
+     * @param lat   The latitude obtained by location measurement
+     * @param alt   The altitude obtained by location measurement
+     * @param speed The estimated speed obtained by location measurement given in m/s
+     * @param acc   The percentage accuracy estimation of the location sensor during the measurement
      */
-    public Measurement(Double zValue, Double filteredZValue, String time, Double longitude, Double latitude, Double altitude, Float speed, Float accuracy) {
-        this.zValue = zValue;
-        this.filteredZValue = filteredZValue;
+    public Measurement(Double z, Double fz, String time, Double lon, Double lat, Double alt, Float speed, Float acc) {
+        this.z = z;
+        this.fz = fz;
         this.time = time;
-        this.longitude = longitude;
-        this.latitude = latitude;
-        this.altitude = altitude;
-        this.speed = speed;
-        this.accuracy = accuracy;
+        this.lon = lon.floatValue();
+        this.lat = lat.floatValue();
+        this.alt = alt.floatValue();
+        this.ms = speed;
+        this.acc = acc;
     }
 
-    public double getzValue() {
-        return zValue;
+    public double getZ() {
+        return z;
     }
 
-    public double getFilteredZValue() {
-        return filteredZValue;
+    public double getFz() {
+        return fz;
     }
 
-    public void setFilteredZValue(Double filteredZValue) {
-        this.filteredZValue = filteredZValue;
+    public void setFz(Double fz) {
+        this.fz = fz;
     }
 
     public String getTime() {
         return time;
     }
 
-    public double getLongitude() {
-        return longitude;
+    public double getLon() {
+        return lon;
     }
 
-    public double getLatitude() {
-        return latitude;
+    public double getLat() {
+        return lat;
     }
 
-    public double getAltitude() {
-        return altitude;
+    public double getAlt() {
+        return alt;
     }
 
-    public float getSpeed() {
-        return speed;
+    public float getMs() {
+        return ms;
     }
 
-    public float getAccuracy() {
-        return accuracy;
+    public float getAcc() {
+        return acc;
     }
 
     @NonNull

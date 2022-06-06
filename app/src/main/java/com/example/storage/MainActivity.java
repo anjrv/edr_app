@@ -18,7 +18,6 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Patterns;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
@@ -57,7 +56,6 @@ public class MainActivity extends AppCompatActivity {
     private final InetAddressValidator mInetAddressValidator = InetAddressValidator.getInstance();
     private final Semaphore mLocSemaphore = new Semaphore(1, true);
     private final int PERMISSION_FINE_LOCATION = 99;
-
     private ActivityMainBinding mBinding;
     private Timer mViewTimer;
     private int mApproxRefresh;
@@ -82,8 +80,6 @@ public class MainActivity extends AppCompatActivity {
         @Override
         @SuppressLint("SimpleDateFormat")
         public void onSensorChanged(SensorEvent event) {
-            if (!switchToggled) Measurements.consecutiveMeasurements = 0;
-
             if (switchToggled && event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
                 float zAcc = event.values[2];
 
@@ -106,35 +102,35 @@ public class MainActivity extends AppCompatActivity {
                     mLocSemaphore.release();
 
                     if (m != null) {
-                        double b0 = 1;
-                        double b1 = 2;
-                        double a1 = -1.94921595802584;
-                        double b01 = 1;
-                        double b11 = 2;
-                        double a11 = -1.88660958262151;
-                        double b02 = 1;
-                        double b12 = -2;
-                        double a12 = -1.999037095803727126;
-                        double b03 = 1;
-                        double b13 = -2;
-                        double a13 = -1.99767915341159740;
+                        final double b0 = 1;
+                        final double b1 = 2;
+                        final double a1 = -1.94921595802584;
+                        final double b01 = 1;
+                        final double b11 = 2;
+                        final double a11 = -1.88660958262151;
+                        final double b02 = 1;
+                        final double b12 = -2;
+                        final double a12 = -1.999037095803727126;
+                        final double b03 = 1;
+                        final double b13 = -2;
+                        final double a13 = -1.99767915341159740;
 
-                        double zWeight = 0.000963484325512291;
-                        double xWeight = 0.000932538415629474;
-                        double yWeight = 0.999518942496229523;
-                        double wWeight = 0.998839971032117524;
+                        final double zWeight = 0.000963484325512291;
+                        final double xWeight = 0.000932538415629474;
+                        final double yWeight = 0.999518942496229523;
+                        final double wWeight = 0.998839971032117524;
 
                         Measurements.sMeasSemaphore.acquire();
                         if (Measurements.consecutiveMeasurements == 0) {
-                            Measurements.zVal[0] = m.getzValue();
+                            Measurements.zVal[0] = m.getZ();
                             Measurements.z[0] = (b0 * Measurements.zVal[0]) * zWeight;
                             Measurements.x[0] = (b01 * Measurements.z[0]) * xWeight;
                             Measurements.y[0] = (b02 * Measurements.x[0]) * yWeight;
                             Measurements.w[0] = (b03 * Measurements.y[0]) * wWeight;
 
-                            m.setFilteredZValue(Measurements.w[0]);
+                            m.setFz(Measurements.w[0]);
                         } else if (Measurements.consecutiveMeasurements == 1) {
-                            Measurements.zVal[1] = m.getzValue();
+                            Measurements.zVal[1] = m.getZ();
 
                             Measurements.z[1] = (b0 * Measurements.zVal[1] + b1 * Measurements.zVal[0]
                                     - a1 * Measurements.z[0]) * zWeight;
@@ -148,16 +144,16 @@ public class MainActivity extends AppCompatActivity {
                             Measurements.w[1] = (b03 * Measurements.y[1] + b13 * Measurements.y[0]
                                     - a13 * Measurements.w[0]) * wWeight;
 
-                            m.setFilteredZValue(Measurements.w[1]);
+                            m.setFz(Measurements.w[1]);
                         } else {
-                            double b2 = 1;
-                            double a2 = 0.953069895327891;
-                            double b21 = 1;
-                            double a21 = 0.890339736284024;
-                            double b22 = 1;
-                            double a22 = 0.9990386741811910775;
-                            double b23 = 1;
-                            double a23 = 0.997680730716872465;
+                            final double b2 = 1;
+                            final double a2 = 0.953069895327891;
+                            final double b21 = 1;
+                            final double a21 = 0.890339736284024;
+                            final double b22 = 1;
+                            final double a22 = 0.9990386741811910775;
+                            final double b23 = 1;
+                            final double a23 = 0.997680730716872465;
 
                             if (Measurements.consecutiveMeasurements > 2) {
                                 // Shift running stats to the left
@@ -177,7 +173,7 @@ public class MainActivity extends AppCompatActivity {
                                 Measurements.w[1] = Measurements.w[2];
                             }
 
-                            Measurements.zVal[2] = m.getzValue();
+                            Measurements.zVal[2] = m.getZ();
 
                             double zData = (b0 * Measurements.zVal[2]
                                     + b1 * Measurements.zVal[1]
@@ -201,13 +197,13 @@ public class MainActivity extends AppCompatActivity {
 
                             Measurements.w[2] = wData * wWeight;
 
-                            m.setFilteredZValue(Measurements.w[2]);
+                            m.setFz(Measurements.w[2]);
                         }
 
                         Measurements.consecutiveMeasurements++;
 
                         if (Measurements.sData.size() >= 10000) {
-                            flushMessages();
+                            flushMessages(Measurements.sData.size());
                         }
 
                         Measurements.sData.add(m);
@@ -222,6 +218,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onAccuracyChanged(Sensor sensor, int i) { /* Unused */ }
     };
+
     private PowerManager.WakeLock mWakeLock;
 
     /**
@@ -229,8 +226,8 @@ public class MainActivity extends AppCompatActivity {
      * <p>
      * NOTE: You must obtain the Measurements semaphore when calling this method!
      */
-    private void flushMessages() {
-        ArrayList<Measurement> copy = new ArrayList<>();
+    private void flushMessages(int size) {
+        final ArrayList<Measurement> copy = new ArrayList<>(size);
 
         for (Measurement ms : Measurements.sData) {
             try {
@@ -240,7 +237,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        Dataframe d = new Dataframe(Build.BRAND, Build.MANUFACTURER, Build.MODEL, Build.ID, Build.VERSION.RELEASE, String.valueOf(mBinding.session.getText()), copy);
+        final Dataframe d = new Dataframe(Build.BRAND, Build.MANUFACTURER, Build.MODEL, Build.ID, Build.VERSION.RELEASE, String.valueOf(mBinding.session.getText()), copy);
         mMessageThread.handleMessage(d, mPublisher, getBaseContext());
 
         Measurements.sData.clear();
@@ -276,7 +273,7 @@ public class MainActivity extends AppCompatActivity {
             Looper.prepare();
             Handler sensorHandler = new Handler(Looper.myLooper());
             mSensorManager
-                    .registerListener(mSensorEventListener, mAccelerometer, SensorManager.SENSOR_DELAY_FASTEST, sensorHandler);
+                    .registerListener(mSensorEventListener, mAccelerometer, 2000, sensorHandler);
             Looper.loop();
         }).start();
 
@@ -288,7 +285,7 @@ public class MainActivity extends AppCompatActivity {
 
         mLocationRequest = LocationRequest.create()
                 .setInterval(1000)
-                .setFastestInterval(500)
+                .setFastestInterval(2)
                 .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY)
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
@@ -343,7 +340,7 @@ public class MainActivity extends AppCompatActivity {
 
                     Measurements.consecutiveMeasurements = 0;
                     if (Measurements.sData.size() > 0) {
-                        flushMessages();
+                        flushMessages(Measurements.sData.size());
                     }
 
                     Measurements.sMeasSemaphore.release();
@@ -593,13 +590,13 @@ public class MainActivity extends AppCompatActivity {
      * Updates on screen information with recent values
      */
     private void updateUI(Measurement m) {
-        mBinding.zValue.setText((String.valueOf(m.getzValue())));
-        mBinding.tvLat.setText(String.valueOf(m.getLatitude()));
-        mBinding.tvLon.setText(String.valueOf(m.getLongitude()));
-        mBinding.tvAccuracy.setText(String.valueOf(m.getAccuracy()));
-        mBinding.tvAltitude.setText(String.valueOf(m.getAltitude()));
-        mBinding.tvSpeed.setText(String.valueOf(m.getSpeed()));
+        mBinding.zValue.setText((String.valueOf(m.getZ())));
+        mBinding.tvLat.setText(String.valueOf(m.getLat()));
+        mBinding.tvLon.setText(String.valueOf(m.getLon()));
+        mBinding.tvAccuracy.setText(String.valueOf(m.getAcc()));
+        mBinding.tvAltitude.setText(String.valueOf(m.getAlt()));
+        mBinding.tvSpeed.setText(String.valueOf(m.getMs()));
         mBinding.time.setText(m.getTime().replace('T', ' ').replace('Z', ' '));
-        mBinding.zFiltered.setText(String.valueOf(Math.max(m.getFilteredZValue(), 0.0)));
+        mBinding.zFiltered.setText(String.valueOf(Math.max(m.getFz(), 0.0)));
     }
 }
