@@ -49,8 +49,8 @@ public class MessageThread extends Thread {
             try {
                 byte[] msg = FileUtils.retrieve(name, c);
                 IMqttDeliveryToken token = Mqtt.publish(mqtt, "EDR", msg);
+                token.waitForCompletion(5);
 
-                token.waitForCompletion();
                 if (token.getException() == null) {
                     FileUtils.delete(name, c);
                     Toast.makeText(c, "Backlog file sent over MQTT", Toast.LENGTH_SHORT).show();
