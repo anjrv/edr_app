@@ -248,9 +248,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBinding = ActivityMainBinding.inflate(getLayoutInflater());
-
-        View view = mBinding.getRoot();
-        setContentView(view);
+        setContentView(mBinding.getRoot());
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -259,8 +257,8 @@ public class MainActivity extends AppCompatActivity {
 
         mWakeLock = null;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            PowerManager powerManager = (PowerManager) this.getSystemService(POWER_SERVICE);
-            mWakeLock = powerManager.newWakeLock(PARTIAL_WAKE_LOCK, "edr:processingWakeLock");
+            mWakeLock = ((PowerManager) this.getSystemService(POWER_SERVICE))
+                    .newWakeLock(PARTIAL_WAKE_LOCK, "edr:processingWakeLock");
         }
 
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -271,14 +269,14 @@ public class MainActivity extends AppCompatActivity {
             Thread.currentThread().setPriority(8); // Relatively high priority
 
             Looper.prepare();
-            Handler sensorHandler = new Handler(Looper.myLooper());
+            final Handler sensorHandler = new Handler(Looper.myLooper());
             mSensorManager
                     .registerListener(mSensorEventListener, mAccelerometer, 2000, sensorHandler);
             Looper.loop();
         }).start();
 
         // Thread looper to be used for location callbacks
-        HandlerThread locationThread = new HandlerThread("loc");
+        final HandlerThread locationThread = new HandlerThread("loc");
         locationThread.start();
         mLocationLooper = locationThread.getLooper();
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
@@ -353,10 +351,10 @@ public class MainActivity extends AppCompatActivity {
         });
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            mApproxRefresh = (int) (1000 / this.getDisplay().getRefreshRate()) + 1;
+            mApproxRefresh = (int) (1000 / this.getDisplay().getRefreshRate());
         } else {
             // Assume 60fps ish, rounded up to not kick off vsync errors
-            mApproxRefresh = 17;
+            mApproxRefresh = 16;
         }
 
         mViewTimer = new Timer();
@@ -532,7 +530,7 @@ public class MainActivity extends AppCompatActivity {
      */
     @SuppressLint("SimpleDateFormat")
     private void scheduleBacklogs() {
-        Handler handler = new Handler(Looper.getMainLooper());
+        final Handler handler = new Handler(Looper.getMainLooper());
         handler.post(new Runnable() {
             @Override
             public void run() {

@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
  * Simple container class for JSON utils
  */
 public class JsonConverter {
+    private static final ObjectWriter writer = new ObjectMapper().writer().withDefaultPrettyPrinter();
 
     /**
      * Converts serializable object to JSON string
@@ -17,8 +18,6 @@ public class JsonConverter {
      * @throws JsonProcessingException error object for write failure
      */
     public static String convert(Object o) throws JsonProcessingException {
-        ObjectWriter writer = new ObjectMapper().writer().withDefaultPrettyPrinter();
-
         return writer.writeValueAsString(o);
     }
 }

@@ -31,6 +31,11 @@ public class MessageThread extends Thread {
         Looper.loop();
     }
 
+    private void writeMsg(String name, byte[] msg, Context c) {
+        FileUtils.write(name, msg, c);
+        Toast.makeText(c, "Measurements written to backlog", Toast.LENGTH_SHORT).show();
+    }
+
     /**
      * Posts a new runnable to the queue.
      * Used to queue stored measurement files
@@ -44,7 +49,7 @@ public class MessageThread extends Thread {
      */
     public void handleFile(String name, MqttAndroidClient mqtt, Context c) {
         handler.post(() -> {
-            if (!mqtt.isConnected()) return; // Misfired request
+            if (!mqtt.isConnected()) return; // Misfired request, do nothing
 
             try {
                 byte[] msg = FileUtils.retrieve(name, c);
@@ -82,17 +87,20 @@ public class MessageThread extends Thread {
 
                 if (hasConnection) {
                     IMqttDeliveryToken token = Mqtt.publish(mqtt, "EDR", msg);
-                    token.waitForCompletion(Mqtt.TIMEOUT);
 
-                    if (token.getException() != null) {
-                        FileUtils.write(d.getData().get(d.getData().size() - 1).getTime(), msg, c);
-                        Toast.makeText(c, "Measurements written to backlog", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(c, "Measurements sent over MQTT", Toast.LENGTH_SHORT).show();
+                    try {
+                        token.waitForCompletion(Mqtt.TIMEOUT);
+
+                        if (token.getException() != null) {
+                            writeMsg(d.getData().get(d.getData().size() - 1).getTime(), msg, c);
+                        } else {
+                            Toast.makeText(c, "Measurements sent over MQTT", Toast.LENGTH_SHORT).show();
+                        }
+                    } catch (Exception e){
+                        writeMsg(d.getData().get(d.getData().size() - 1).getTime(), msg, c);
                     }
                 } else {
-                    FileUtils.write(d.getData().get(d.getData().size() - 1).getTime(), msg, c);
-                    Toast.makeText(c, "Measurements written to backlog", Toast.LENGTH_SHORT).show();
+                    writeMsg(d.getData().get(d.getData().size() - 1).getTime(), msg, c);
                 }
             } catch (Exception e) {
                 e.printStackTrace();

@@ -15,7 +15,8 @@ import info.mqtt.android.service.MqttAndroidClient;
  * Wrapper class to provide configuration for the paho MQTT methods
  */
 public class Mqtt {
-    public static final int TIMEOUT = 5;
+    private static final String clientId = Build.BRAND + "_" + Build.ID;
+    public static final int TIMEOUT = 5000;
 
     /**
      * Generate a new MQTT client
@@ -25,7 +26,6 @@ public class Mqtt {
      * @return The constructed client object
      */
     public static MqttAndroidClient generateClient(Context c, String server) {
-        String clientId = Build.BRAND + "_" + Build.ID;
         return new MqttAndroidClient(c, "tcp://" + server + ":1883", clientId, Ack.AUTO_ACK);
     }
 
