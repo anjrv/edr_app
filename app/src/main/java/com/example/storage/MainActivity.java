@@ -201,7 +201,7 @@ public class MainActivity extends AppCompatActivity {
 
                         Measurements.consecutiveMeasurements++;
 
-                        if (Measurements.sData.size() >= 5000) {
+                        if (Measurements.sData.size() >= 10000) {
                             flushMessages(Measurements.sData.size());
                         }
 
@@ -310,9 +310,8 @@ public class MainActivity extends AppCompatActivity {
             if (isChecked) {
                 if (mWakeLock != null)
                     mWakeLock.acquire();
-                else
-                    getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
+                getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                 startLocationUpdates();
 
                 if (mSensorManager != null)
@@ -323,8 +322,8 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 if (mWakeLock != null)
                     mWakeLock.release();
-                else
-                    getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
                 if (mFusedLocationProviderClient != null)
                     mFusedLocationProviderClient.removeLocationUpdates(mLocationCallback);

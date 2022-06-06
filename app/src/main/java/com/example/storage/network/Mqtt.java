@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.Build;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
@@ -14,9 +13,10 @@ import info.mqtt.android.service.MqttAndroidClient;
 /**
  * Wrapper class to provide configuration for the paho MQTT methods
  */
+@SuppressWarnings("unused")
 public class Mqtt {
     private static final String clientId = Build.BRAND + "_" + Build.ID;
-    public static final int TIMEOUT = 5000;
+    public static final int TIMEOUT = 10000;
 
     /**
      * Generate a new MQTT client
