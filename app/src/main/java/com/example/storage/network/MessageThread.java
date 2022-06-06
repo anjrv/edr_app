@@ -82,7 +82,7 @@ public class MessageThread extends Thread {
 
                 if (hasConnection) {
                     IMqttDeliveryToken token = Mqtt.publish(mqtt, "EDR", msg);
-                    token.waitForCompletion();
+                    token.waitForCompletion(5);
 
                     if (token.getException() != null) {
                         FileUtils.write(d.getData().get(d.getData().size() - 1).getTime(), msg, c);

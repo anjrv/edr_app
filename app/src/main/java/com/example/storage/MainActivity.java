@@ -202,7 +202,7 @@ public class MainActivity extends AppCompatActivity {
 
                         Measurements.consecutiveMeasurements++;
 
-                        if (Measurements.sData.size() >= 10000) {
+                        if (Measurements.sData.size() >= 5000) {
                             flushMessages(Measurements.sData.size());
                         }
 

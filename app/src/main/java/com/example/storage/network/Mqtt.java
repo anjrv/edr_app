@@ -39,7 +39,8 @@ public class Mqtt {
         MqttConnectOptions opts = new MqttConnectOptions();
         opts.setUserName(username);
         opts.setPassword(password.toCharArray());
-        opts.setKeepAliveInterval(60);
+        opts.setKeepAliveInterval(30);
+        opts.setConnectionTimeout(5);
         opts.setAutomaticReconnect(true);
 
         client.connect(opts);
