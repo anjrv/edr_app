@@ -15,7 +15,7 @@ import info.mqtt.android.service.MqttAndroidClient;
  */
 @SuppressWarnings("unused")
 public class Mqtt {
-    private static final String clientId = Build.BRAND + "_" + Build.ID;
+    // private static final String clientId = Build.BRAND + "_" + Build.ID;
     public static final int TIMEOUT = 10000;
 
     /**
@@ -25,7 +25,7 @@ public class Mqtt {
      * @param server The server IP to attempt to connect to
      * @return The constructed client object
      */
-    public static MqttAndroidClient generateClient(Context c, String server) {
+    public static MqttAndroidClient generateClient(Context c, String clientId, String server) {
         return new MqttAndroidClient(c, "tcp://" + server + ":1883", clientId, Ack.AUTO_ACK);
     }
 
@@ -40,7 +40,8 @@ public class Mqtt {
         MqttConnectOptions opts = new MqttConnectOptions();
         opts.setUserName(username);
         opts.setPassword(password.toCharArray());
-        opts.setKeepAliveInterval(30);
+        opts.setCleanSession(true);
+        opts.setKeepAliveInterval(0);
         opts.setConnectionTimeout(TIMEOUT);
         opts.setAutomaticReconnect(true);
 

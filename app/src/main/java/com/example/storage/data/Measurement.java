@@ -12,7 +12,7 @@ public class Measurement implements Cloneable {
     private final float alt;
     private final float ms;
     private final float acc;
-    private final double z;
+    private final float z;
     private double fz;
 
     /**
@@ -27,7 +27,7 @@ public class Measurement implements Cloneable {
      * @param speed The estimated speed obtained by location measurement given in m/s
      * @param acc   The percentage accuracy estimation of the location sensor during the measurement
      */
-    public Measurement(Double z, Double fz, String time, Double lon, Double lat, Double alt, Float speed, Float acc) {
+    public Measurement(Float z, Double fz, String time, Double lon, Double lat, Double alt, Float speed, Float acc) {
         this.z = z;
         this.fz = fz;
         this.time = time;
@@ -38,7 +38,7 @@ public class Measurement implements Cloneable {
         this.acc = acc;
     }
 
-    public double getZ() {
+    public float getZ() {
         return z;
     }
 
