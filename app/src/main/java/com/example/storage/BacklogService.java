@@ -1,7 +1,7 @@
 package com.example.storage;
 
-import android.annotation.SuppressLint;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Handler;
@@ -26,6 +26,7 @@ public class BacklogService extends Service {
     private MqttAndroidClient mPublisher;
     private MessageThread mMessageThread;
     private HandlerThread mBacklogThread;
+    private Context ctx;
     private Looper mBacklogLooper;
     private Handler mBacklogHandler;
 
@@ -39,7 +40,9 @@ public class BacklogService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        mPublisher = Mqtt.generateClient(this, clientId, (String) intent.getExtras().get("SERVER"));
+        ctx = this;
+
+        mPublisher = Mqtt.generateClient(ctx, clientId, (String) intent.getExtras().get("SERVER"));
         Mqtt.connect(mPublisher, getString(R.string.mqtt_username), getString(R.string.mqtt_password));
 
         scheduleBacklogs();
@@ -55,6 +58,8 @@ public class BacklogService extends Service {
         mPublisher.unregisterResources();
         mPublisher.close();
         mPublisher.disconnect();
+
+        Measurements.backlogHasConnection = false;
 
         mMessageThread.interrupt();
         mBacklogThread.interrupt();
@@ -75,23 +80,21 @@ public class BacklogService extends Service {
         mBacklogHandler.post(new Runnable() {
             @Override
             public void run() {
+                ArrayList<String> files = FileUtils.list(ctx);
+
                 if (mPublisher != null && mPublisher.isConnected()) {
                     Measurements.backlogHasConnection = mPublisher.isConnected();
 
-                    ArrayList<String> files = FileUtils.list(getBaseContext());
-
-                    if (files.size() == 0)
-                        stopSelf(); // Nothing left
-
                     if (mMessageThread != null && files.size() > 0) {
-                        mMessageThread.handleFile(files.get(0), mPublisher, getBaseContext());
+                        mMessageThread.handleFile(files.get(0), mPublisher, ctx);
                     }
-                }
-
-                if (mPublisher != null && !mPublisher.isConnected() && NetworkUtils.isNetworkConnected(getBaseContext()))
+                } else if (mPublisher != null && !mPublisher.isConnected() && NetworkUtils.isNetworkConnected(ctx))
                     Mqtt.connect(mPublisher, getString(R.string.mqtt_username), getString(R.string.mqtt_password));
 
-                mBacklogHandler.postDelayed(this, mPublisher != null && mPublisher.isConnected() ? 0 : 60000);
+                if (files.size() > 1)
+                    mBacklogHandler.postDelayed(this, mPublisher != null && mPublisher.isConnected() ? (Mqtt.TIMEOUT + 1000) : 60000);
+                else // Disconnect from within handler thread not ideal, ensure adequate time for previous message to complete
+                    mBacklogHandler.postDelayed(() -> stopSelf(), Mqtt.TIMEOUT * 2);
             }
         });
     }

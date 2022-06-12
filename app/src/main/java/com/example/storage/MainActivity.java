@@ -59,9 +59,10 @@ public class MainActivity extends AppCompatActivity {
         boolean sensorsRunning = isServiceRunning(SensorService.class);
 
         mBacklogIntent = new Intent(this, BacklogService.class);
-        if (!sensorsRunning)
-            tryEnableBacklogs();
-        else {
+        if (!sensorsRunning) {
+            if (FileUtils.list(this).size() > 0)
+                tryEnableBacklogs();
+        } else {
             mBinding.server.setText(mSharedPreferences.getString("SERVER", String.valueOf(R.string.default_ip)));
             mBinding.session.setText(mSharedPreferences.getString("SESSION", ""));
             mBinding.switchBtn.setChecked(true);
@@ -96,7 +97,6 @@ public class MainActivity extends AppCompatActivity {
                 getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
                 stopService(sensorIntent);
-                tryEnableBacklogs();
 
                 try {
                     List<Measurement> data = Measurements.firstArray ? Measurements.sData1.subList(0, Measurements.currIdx) :
@@ -114,6 +114,8 @@ public class MainActivity extends AppCompatActivity {
 
                 Measurements.sData1.clear();
                 Measurements.sData2.clear();
+
+                tryEnableBacklogs();
 
                 enableEditText(mBinding.session);
                 enableEditText(mBinding.server);

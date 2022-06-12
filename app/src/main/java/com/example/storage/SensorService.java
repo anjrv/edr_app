@@ -53,6 +53,7 @@ public class SensorService extends Service implements SensorEventListener {
     private MqttAndroidClient mPublisher;
     private SensorManager mSensorManager;
     private MessageThread mMessageThread;
+    private Context ctx;
     private Thread mCallbackThread;
     private Handler mCallbackHandler;
     private Looper mCallbackLooper;
@@ -121,13 +122,15 @@ public class SensorService extends Service implements SensorEventListener {
             ActivityCompat.requestPermissions((Activity) getBaseContext(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 99);
         }
 
+        ctx = this;
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Intent notificationIntent = new Intent(this, MainActivity.class);
             PendingIntent pendingIntent =
                     PendingIntent.getActivity(this, 0, notificationIntent,
                             PendingIntent.FLAG_IMMUTABLE);
 
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(getBaseContext(), "SENSOR_CHANNEL")
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(ctx, "SENSOR_CHANNEL")
                     .setSmallIcon(R.drawable.ic_launcher_new_foreground)
                     .setContentIntent(pendingIntent)
                     .setAutoCancel(true)
@@ -155,8 +158,6 @@ public class SensorService extends Service implements SensorEventListener {
         Measurements.currIdx = 0;
         Measurements.firstArray = true;
 
-        Context ctx = this;
-
         mSession = (String) intent.getExtras().get("SESSION");
 
         mPublisher = Mqtt.generateClient(this, clientId, (String) intent.getExtras().get("SERVER"));
@@ -167,7 +168,7 @@ public class SensorService extends Service implements SensorEventListener {
             @Override
             public void run() {
                 if (mPublisher != null && mPublisher.isConnected()) {
-                    ArrayList<String> files = FileUtils.list(getBaseContext());
+                    ArrayList<String> files = FileUtils.list(ctx);
 
                     if (mMessageThread != null && files.size() > 0) {
                         mMessageThread.handleFile(files.get(0), mPublisher, ctx);
@@ -212,6 +213,8 @@ public class SensorService extends Service implements SensorEventListener {
         mPublisher.close();
         mPublisher.disconnect();
 
+        Measurements.sensorHasConnection = false;
+
         super.onDestroy();
     }
 
@@ -231,7 +234,7 @@ public class SensorService extends Service implements SensorEventListener {
         mMessageThread.handleMessage(d, mPublisher, this);
 
         // Give the connection a kick
-        if (mPublisher != null && !mPublisher.isConnected() && NetworkUtils.isNetworkConnected(getBaseContext()))
+        if (mPublisher != null && !mPublisher.isConnected() && NetworkUtils.isNetworkConnected(ctx))
             Mqtt.connect(mPublisher, getString(R.string.mqtt_username), getString(R.string.mqtt_password));
     }
 
