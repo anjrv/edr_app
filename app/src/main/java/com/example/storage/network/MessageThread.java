@@ -6,6 +6,7 @@ import android.os.Looper;
 import android.widget.Toast;
 
 import com.example.storage.data.Dataframe;
+import com.example.storage.data.Measurements;
 import com.example.storage.utils.FileUtils;
 import com.example.storage.utils.JsonConverter;
 import com.example.storage.utils.ZipUtils;
@@ -34,7 +35,7 @@ public class MessageThread extends Thread {
 
     private void writeMsg(String name, byte[] msg, Context c) {
         FileUtils.write(name, msg, c);
-        Toast.makeText(c, "Measurements written to backlog", Toast.LENGTH_SHORT).show();
+        // Toast.makeText(c, "Measurements written to backlog", Toast.LENGTH_SHORT).show();
     }
 
     /**
@@ -53,12 +54,19 @@ public class MessageThread extends Thread {
             if (!mqtt.isConnected()) return; // Misfired request, do nothing
 
             try {
-                IMqttDeliveryToken token = Mqtt.publish(mqtt, "EDR", FileUtils.retrieve(name, c));
+                byte[] data = FileUtils.retrieve(name, c);
+                if (data.length == 0) {
+                   // Nothing?
+                   FileUtils.delete(name, c);
+                   return;
+                }
+
+                IMqttDeliveryToken token = Mqtt.publish(mqtt, "EDR", data);
                 token.waitForCompletion(Mqtt.TIMEOUT);
 
                 if (token.getException() == null) {
                     FileUtils.delete(name, c);
-                    Toast.makeText(c, "Backlog file sent over MQTT", Toast.LENGTH_SHORT).show();
+                    // Toast.makeText(c, "Backlog file sent over MQTT", Toast.LENGTH_SHORT).show();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -91,7 +99,7 @@ public class MessageThread extends Thread {
                         if (token.getException() != null) {
                             writeMsg(d.getData().get(d.getData().size() - 1).getTime(), msg, c);
                         } else {
-                            Toast.makeText(c, "Measurements sent over MQTT", Toast.LENGTH_SHORT).show();
+                            // Toast.makeText(c, "Measurements sent over MQTT", Toast.LENGTH_SHORT).show();
                         }
                     } catch (Exception e) {
                         writeMsg(d.getData().get(d.getData().size() - 1).getTime(), msg, c);

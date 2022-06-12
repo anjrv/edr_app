@@ -15,6 +15,7 @@ import com.example.storage.data.Measurements;
 import com.example.storage.network.MessageThread;
 import com.example.storage.network.Mqtt;
 import com.example.storage.utils.FileUtils;
+import com.example.storage.utils.NetworkUtils;
 
 import java.util.ArrayList;
 
@@ -79,13 +80,18 @@ public class BacklogService extends Service {
 
                     ArrayList<String> files = FileUtils.list(getBaseContext());
 
+                    if (files.size() == 0)
+                        stopSelf(); // Nothing left
+
                     if (mMessageThread != null && files.size() > 0) {
                         mMessageThread.handleFile(files.get(0), mPublisher, getBaseContext());
                     }
                 }
 
-                // Queue more often if MessageThread isn't being used
-                mBacklogHandler.postDelayed(this, 20000);
+                if (mPublisher != null && !mPublisher.isConnected() && NetworkUtils.isNetworkConnected(getBaseContext()))
+                    Mqtt.connect(mPublisher, getString(R.string.mqtt_username), getString(R.string.mqtt_password));
+
+                mBacklogHandler.postDelayed(this, mPublisher != null && mPublisher.isConnected() ? 0 : 60000);
             }
         });
     }

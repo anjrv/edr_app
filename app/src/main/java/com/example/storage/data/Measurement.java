@@ -5,15 +5,18 @@ import androidx.annotation.NonNull;
 /**
  * Container Object for individual moment to moment measurements
  */
+@SuppressWarnings("unused")
 public class Measurement implements Cloneable {
-    private final String time;
-    private final float lon;
-    private final float lat;
-    private final float alt;
-    private final float ms;
-    private final float acc;
-    private final float z;
+    private String time;
+    private float lon;
+    private float lat;
+    private float alt;
+    private float ms;
+    private float acc;
+    private float z;
     private double fz;
+
+    public Measurement() {}
 
     /**
      * Container class for storing moment to moment measurements
@@ -38,16 +41,44 @@ public class Measurement implements Cloneable {
         this.acc = acc;
     }
 
+    public void setTime(String time) {
+        this.time = time;
+    }
+
+    public void setLon(Double lon) {
+        this.lon = lon.floatValue();
+    }
+
+    public void setLat(Double lat) {
+        this.lat = lat.floatValue();
+    }
+
+    public void setAlt(Double alt) {
+        this.alt = alt.floatValue();
+    }
+
+    public void setMs(float ms) {
+        this.ms = ms;
+    }
+
+    public void setAcc(float acc) {
+        this.acc = acc;
+    }
+
+    public void setZ(float z) {
+        this.z = z;
+    }
+
+    public void setFz(double fz) {
+        this.fz = fz;
+    }
+
     public float getZ() {
         return z;
     }
 
     public double getFz() {
         return fz;
-    }
-
-    public void setFz(Double fz) {
-        this.fz = fz;
     }
 
     public String getTime() {

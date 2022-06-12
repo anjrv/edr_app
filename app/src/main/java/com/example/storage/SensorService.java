@@ -32,6 +32,7 @@ import com.example.storage.data.Measurements;
 import com.example.storage.network.MessageThread;
 import com.example.storage.network.Mqtt;
 import com.example.storage.utils.FileUtils;
+import com.example.storage.utils.NetworkUtils;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -48,6 +49,7 @@ import info.mqtt.android.service.MqttAndroidClient;
 
 public class SensorService extends Service implements SensorEventListener {
     private static final String clientId = Build.BRAND + "_" + Build.ID + "_SENSORS";
+    private static final Dataframe d = new Dataframe();
     private MqttAndroidClient mPublisher;
     private SensorManager mSensorManager;
     private MessageThread mMessageThread;
@@ -103,14 +105,11 @@ public class SensorService extends Service implements SensorEventListener {
             @Override
             public void onLocationResult(@NonNull LocationResult locationResult) {
                 super.onLocationResult(locationResult);
-
-                try {
-                    Measurements.sLocSemaphore.acquire();
-                    Measurements.sCurrLoc = locationResult.getLastLocation();
-                    Measurements.sLocSemaphore.release();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                Measurements.sLongitude = locationResult.getLastLocation().getLongitude();
+                Measurements.sLatitude = locationResult.getLastLocation().getLatitude();
+                Measurements.sAltitude = locationResult.getLastLocation().getAltitude();
+                Measurements.sSpeed = locationResult.getLastLocation().getSpeed();
+                Measurements.sAccuracy = locationResult.getLastLocation().getAccuracy();
             }
         };
     }
@@ -146,6 +145,16 @@ public class SensorService extends Service implements SensorEventListener {
             startForeground(1, notification);
         }
 
+        // Preallocate all memory
+        for (int i = 0; i < 10000; i++) {
+            Measurements.sData1.add(new Measurement());
+            Measurements.sData2.add(new Measurement());
+        }
+
+        Measurements.consecutiveMeasurements = 0;
+        Measurements.currIdx = 0;
+        Measurements.firstArray = true;
+
         Context ctx = this;
 
         mSession = (String) intent.getExtras().get("SESSION");
@@ -177,7 +186,7 @@ public class SensorService extends Service implements SensorEventListener {
                     .requestLocationUpdates(mLocationRequest, mLocationCallback, mLocationLooper);
 
         mSensorManager
-                .registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_FASTEST, mCallbackHandler);
+                .registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), 2000, mCallbackHandler);
 
         return START_STICKY;
     }
@@ -208,25 +217,22 @@ public class SensorService extends Service implements SensorEventListener {
 
     /**
      * Send the currently stored messages to the message thread handler
-     * <p>
-     * NOTE: You must obtain the Measurements semaphore when calling this method!
      */
-    private void flushMessages(int size) {
-        final ArrayList<Measurement> copy = new ArrayList<>(size);
-
-        for (Measurement ms : Measurements.sData) {
-            try {
-                copy.add(ms.clone());
-            } catch (CloneNotSupportedException e) {
-                e.printStackTrace();
-            }
-        }
-
-        final Dataframe d = new Dataframe(Build.BRAND, Build.MANUFACTURER, Build.MODEL, Build.ID, Build.VERSION.RELEASE, mSession, copy);
+    private void flushMessages(boolean first, int idx) {
+        d.setBrand(Build.BRAND);
+        d.setManufacturer(Build.MANUFACTURER);
+        d.setModel(Build.MODEL);
+        d.setId(Build.ID);
+        d.setVersion(Build.VERSION.RELEASE);
+        d.setSession(mSession);
+        d.setData(first ? Measurements.sData1.subList(0, idx) :
+                Measurements.sData2.subList(0, idx));
 
         mMessageThread.handleMessage(d, mPublisher, this);
 
-        Measurements.sData.clear();
+        // Give the connection a kick
+        if (mPublisher != null && !mPublisher.isConnected() && NetworkUtils.isNetworkConnected(getBaseContext()))
+            Mqtt.connect(mPublisher, getString(R.string.mqtt_username), getString(R.string.mqtt_password));
     }
 
     @Override
@@ -279,130 +285,142 @@ public class SensorService extends Service implements SensorEventListener {
          */
         public void handleMeasurement(float zAcc, String time) {
             handler.post(() -> {
-                try {
-                    Measurement m = null;
-                    Measurements.sLocSemaphore.acquire();
-
-                    if (Measurements.sCurrLoc != null) {
-                        m = new Measurement(
-                                zAcc, 0.0, time, Measurements.sCurrLoc.getLongitude(), Measurements.sCurrLoc.getLatitude(),
-                                Measurements.sCurrLoc.getAltitude(), Measurements.sCurrLoc.getSpeed(), Measurements.sCurrLoc.getAccuracy()
-                        );
-                    }
-
-                    Measurements.sLocSemaphore.release();
-
-                    if (m != null) {
-                        final double b0 = 1;
-                        final double b1 = 2;
-                        final double a1 = -1.94921595802584;
-                        final double b01 = 1;
-                        final double b11 = 2;
-                        final double a11 = -1.88660958262151;
-                        final double b02 = 1;
-                        final double b12 = -2;
-                        final double a12 = -1.999037095803727126;
-                        final double b03 = 1;
-                        final double b13 = -2;
-                        final double a13 = -1.99767915341159740;
-
-                        final double zWeight = 0.000963484325512291;
-                        final double xWeight = 0.000932538415629474;
-                        final double yWeight = 0.999518942496229523;
-                        final double wWeight = 0.998839971032117524;
-
-                        Measurements.sMeasSemaphore.acquire();
-                        if (Measurements.consecutiveMeasurements == 0) {
-                            Measurements.zVal[0] = m.getZ();
-                            Measurements.z[0] = (b0 * Measurements.zVal[0]) * zWeight;
-                            Measurements.x[0] = (b01 * Measurements.z[0]) * xWeight;
-                            Measurements.y[0] = (b02 * Measurements.x[0]) * yWeight;
-                            Measurements.w[0] = (b03 * Measurements.y[0]) * wWeight;
-
-                            m.setFz(Measurements.w[0]);
-                        } else if (Measurements.consecutiveMeasurements == 1) {
-                            Measurements.zVal[1] = m.getZ();
-
-                            Measurements.z[1] = (b0 * Measurements.zVal[1] + b1 * Measurements.zVal[0]
-                                    - a1 * Measurements.z[0]) * zWeight;
-
-                            Measurements.x[1] = (b01 * Measurements.z[1] + b11 * Measurements.z[0]
-                                    - a11 * Measurements.x[0]) * xWeight;
-
-                            Measurements.y[1] = (b02 * Measurements.x[1] + b12 * Measurements.x[0]
-                                    - a12 * Measurements.y[0]) * yWeight;
-
-                            Measurements.w[1] = (b03 * Measurements.y[1] + b13 * Measurements.y[0]
-                                    - a13 * Measurements.w[0]) * wWeight;
-
-                            m.setFz(Measurements.w[1]);
-                        } else {
-                            final double b2 = 1;
-                            final double a2 = 0.953069895327891;
-                            final double b21 = 1;
-                            final double a21 = 0.890339736284024;
-                            final double b22 = 1;
-                            final double a22 = 0.9990386741811910775;
-                            final double b23 = 1;
-                            final double a23 = 0.997680730716872465;
-
-                            if (Measurements.consecutiveMeasurements > 2) {
-                                // Shift running stats to the left
-                                Measurements.zVal[0] = Measurements.zVal[1];
-                                Measurements.zVal[1] = Measurements.zVal[2];
-
-                                Measurements.z[0] = Measurements.z[1];
-                                Measurements.z[1] = Measurements.z[2];
-
-                                Measurements.x[0] = Measurements.x[1];
-                                Measurements.x[1] = Measurements.x[2];
-
-                                Measurements.y[0] = Measurements.y[1];
-                                Measurements.y[1] = Measurements.y[2];
-
-                                Measurements.w[0] = Measurements.w[1];
-                                Measurements.w[1] = Measurements.w[2];
-                            }
-
-                            Measurements.zVal[2] = m.getZ();
-
-                            double zData = (b0 * Measurements.zVal[2]
-                                    + b1 * Measurements.zVal[1]
-                                    + b2 * Measurements.zVal[0]
-                                    - (a1) * Measurements.z[1] - (a2) * Measurements.z[0]);
-
-                            Measurements.z[2] = zData * zWeight;
-
-                            double xData = (b01 * Measurements.z[2] + b11 * Measurements.z[1]
-                                    + b21 * Measurements.z[0] - a11 * Measurements.x[1] - a21 * Measurements.x[0]);
-
-                            Measurements.x[2] = xData * xWeight;
-
-                            double yData = (b02 * Measurements.x[2] + b12 * Measurements.x[1]
-                                    + b22 * Measurements.x[0] - a12 * Measurements.y[1] - a22 * Measurements.y[0]);
-
-                            Measurements.y[2] = yData * yWeight;
-
-                            double wData = (b03 * Measurements.y[2] + b13 * Measurements.y[1]
-                                    + b23 * Measurements.y[0] - a13 * Measurements.w[1] - a23 * Measurements.w[0]);
-
-                            Measurements.w[2] = wData * wWeight;
-
-                            m.setFz(Measurements.w[2]);
-                        }
-
-                        Measurements.consecutiveMeasurements++;
-
-                        if (Measurements.sData.size() >= 10000) {
-                            flushMessages(Measurements.sData.size());
-                        }
-
-                        Measurements.sData.add(m);
-                        Measurements.sMeasSemaphore.release();
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
+                if (Measurements.sLongitude == Double.NEGATIVE_INFINITY || Measurements.sData1.size() == 0 || Measurements.sData2.size() == 0) {
+                    return;
                 }
+
+                double fz = 0.0;
+
+                final double b0 = 1;
+                final double b1 = 2;
+                final double a1 = -1.94921595802584;
+                final double b01 = 1;
+                final double b11 = 2;
+                final double a11 = -1.88660958262151;
+                final double b02 = 1;
+                final double b12 = -2;
+                final double a12 = -1.999037095803727126;
+                final double b03 = 1;
+                final double b13 = -2;
+                final double a13 = -1.99767915341159740;
+
+                final double zWeight = 0.000963484325512291;
+                final double xWeight = 0.000932538415629474;
+                final double yWeight = 0.999518942496229523;
+                final double wWeight = 0.998839971032117524;
+
+                if (Measurements.consecutiveMeasurements == 0) {
+                    Measurements.zVal[0] = zAcc;
+                    Measurements.z[0] = (b0 * Measurements.zVal[0]) * zWeight;
+                    Measurements.x[0] = (b01 * Measurements.z[0]) * xWeight;
+                    Measurements.y[0] = (b02 * Measurements.x[0]) * yWeight;
+                    Measurements.w[0] = (b03 * Measurements.y[0]) * wWeight;
+
+                    fz = Measurements.w[0];
+                } else if (Measurements.consecutiveMeasurements == 1) {
+                    Measurements.zVal[1] = zAcc;
+
+                    Measurements.z[1] = (b0 * Measurements.zVal[1] + b1 * Measurements.zVal[0]
+                            - a1 * Measurements.z[0]) * zWeight;
+
+                    Measurements.x[1] = (b01 * Measurements.z[1] + b11 * Measurements.z[0]
+                            - a11 * Measurements.x[0]) * xWeight;
+
+                    Measurements.y[1] = (b02 * Measurements.x[1] + b12 * Measurements.x[0]
+                            - a12 * Measurements.y[0]) * yWeight;
+
+                    Measurements.w[1] = (b03 * Measurements.y[1] + b13 * Measurements.y[0]
+                            - a13 * Measurements.w[0]) * wWeight;
+
+                    fz = Measurements.w[1];
+                } else {
+                    final double b2 = 1;
+                    final double a2 = 0.953069895327891;
+                    final double b21 = 1;
+                    final double a21 = 0.890339736284024;
+                    final double b22 = 1;
+                    final double a22 = 0.9990386741811910775;
+                    final double b23 = 1;
+                    final double a23 = 0.997680730716872465;
+
+                    if (Measurements.consecutiveMeasurements > 2) {
+                        // Shift running stats to the left
+                        Measurements.zVal[0] = Measurements.zVal[1];
+                        Measurements.zVal[1] = Measurements.zVal[2];
+
+                        Measurements.z[0] = Measurements.z[1];
+                        Measurements.z[1] = Measurements.z[2];
+
+                        Measurements.x[0] = Measurements.x[1];
+                        Measurements.x[1] = Measurements.x[2];
+
+                        Measurements.y[0] = Measurements.y[1];
+                        Measurements.y[1] = Measurements.y[2];
+
+                        Measurements.w[0] = Measurements.w[1];
+                        Measurements.w[1] = Measurements.w[2];
+                    }
+
+                    Measurements.zVal[2] = zAcc;
+
+                    double zData = (b0 * Measurements.zVal[2]
+                            + b1 * Measurements.zVal[1]
+                            + b2 * Measurements.zVal[0]
+                            - (a1) * Measurements.z[1] - (a2) * Measurements.z[0]);
+
+                    Measurements.z[2] = zData * zWeight;
+
+                    double xData = (b01 * Measurements.z[2] + b11 * Measurements.z[1]
+                            + b21 * Measurements.z[0] - a11 * Measurements.x[1] - a21 * Measurements.x[0]);
+
+                    Measurements.x[2] = xData * xWeight;
+
+                    double yData = (b02 * Measurements.x[2] + b12 * Measurements.x[1]
+                            + b22 * Measurements.x[0] - a12 * Measurements.y[1] - a22 * Measurements.y[0]);
+
+                    Measurements.y[2] = yData * yWeight;
+
+                    double wData = (b03 * Measurements.y[2] + b13 * Measurements.y[1]
+                            + b23 * Measurements.y[0] - a13 * Measurements.w[1] - a23 * Measurements.w[0]);
+
+                    Measurements.w[2] = wData * wWeight;
+
+                    fz = Measurements.w[2];
+                }
+
+                int tmp = Measurements.consecutiveMeasurements;
+                Measurements.consecutiveMeasurements = tmp + 1;
+
+                if (Measurements.firstArray) {
+                    if (Measurements.currIdx >= 10000) {
+                        flushMessages(true, Measurements.currIdx);
+                        Measurements.firstArray = false;
+                        Measurements.currIdx = 0;
+                    }
+                } else {
+                    if (Measurements.currIdx >= 10000) {
+                        flushMessages(false, Measurements.currIdx);
+                        Measurements.firstArray = true;
+                        Measurements.currIdx = 0;
+                    }
+                }
+
+                // Pull a pointer instead of creating a new allocation
+                Measurement m = Measurements.firstArray ?
+                        Measurements.sData1.get(Measurements.currIdx) :
+                        Measurements.sData2.get(Measurements.currIdx);
+
+                m.setZ(zAcc);
+                m.setTime(time);
+                m.setLon(Measurements.sLongitude);
+                m.setLat(Measurements.sLatitude);
+                m.setAlt(Measurements.sAltitude);
+                m.setMs(Measurements.sSpeed);
+                m.setAcc(Measurements.sAccuracy);
+                m.setFz(fz);
+
+                int idx = Measurements.currIdx;
+                Measurements.currIdx = idx + 1;
             });
         }
     }

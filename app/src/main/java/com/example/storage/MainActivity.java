@@ -29,6 +29,7 @@ import com.example.storage.utils.ZipUtils;
 import org.apache.commons.validator.routines.InetAddressValidator;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -98,40 +99,34 @@ public class MainActivity extends AppCompatActivity {
                 tryEnableBacklogs();
 
                 try {
-                    Measurements.sMeasSemaphore.acquire();
+                    List<Measurement> data = Measurements.firstArray ? Measurements.sData1.subList(0, Measurements.currIdx) :
+                            Measurements.sData2.subList(0, Measurements.currIdx);
 
-                    final ArrayList<Measurement> copy = new ArrayList<>(Measurements.sData.size());
+                    if (data.size() > 0) {
+                        final Dataframe d = new Dataframe(Build.BRAND, Build.MANUFACTURER, Build.MODEL, Build.ID, Build.VERSION.RELEASE, String.valueOf(mBinding.session.getText()), data);
+                        final byte[] msg = ZipUtils.compress(JsonConverter.convert(d));
 
-                    for (Measurement ms : Measurements.sData) {
-                        try {
-                            copy.add(ms.clone());
-                        } catch (CloneNotSupportedException e) {
-                            e.printStackTrace();
-                        }
+                        FileUtils.write(d.getData().get(0).getTime(), msg, this);
                     }
-
-                    final Dataframe d = new Dataframe(Build.BRAND, Build.MANUFACTURER, Build.MODEL, Build.ID, Build.VERSION.RELEASE, String.valueOf(mBinding.session.getText()), copy);
-
-                    Measurements.sData.clear();
-                    Measurements.sMeasSemaphore.release();
-
-                    final byte[] msg = ZipUtils.compress(JsonConverter.convert(d));
-                    FileUtils.write(d.getData().get(d.getData().size() - 1).getTime(), msg, this);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+
+                Measurements.sData1.clear();
+                Measurements.sData2.clear();
 
                 enableEditText(mBinding.session);
                 enableEditText(mBinding.server);
             }
         });
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            mApproxRefresh = (int) (1000 / this.getDisplay().getRefreshRate()) + 1;
-        } else {
-            // Assume 60fps ish, rounded up
-            mApproxRefresh = 17;
-        }
+        mApproxRefresh = 1000;
+        // if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        //     mApproxRefresh = (int) (1000 / this.getDisplay().getRefreshRate()) + 1;
+        // } else {
+        //     // Assume 60fps ish, rounded up
+        //     mApproxRefresh = 17;
+        // }
 
         mViewTimer = new Timer();
         scheduleUITimer();
@@ -264,17 +259,11 @@ public class MainActivity extends AppCompatActivity {
 
                 if (mBinding.switchBtn.isChecked()) {
                     runOnUiThread(() -> {
-                        try {
-                            Measurements.sMeasSemaphore.acquire();
-
-                            int idx = Measurements.sData.size() - 1;
-                            if (idx >= 0) {
-                                updateUI(Measurements.sData.get(idx));
-                            }
-
-                            Measurements.sMeasSemaphore.release();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
+                        if (Measurements.currIdx > 1) { // Current index to write to, read one back
+                            if (Measurements.firstArray) {
+                                updateUI(Measurements.sData1.get(Measurements.currIdx - 1));
+                            } else
+                                updateUI(Measurements.sData2.get(Measurements.currIdx - 1));
                         }
                     });
                 }
@@ -286,6 +275,8 @@ public class MainActivity extends AppCompatActivity {
      * Updates on screen information with recent values
      */
     private void updateUI(Measurement m) {
+        if (m.getTime() == null) return;
+
         mBinding.zValue.setText((String.valueOf(m.getZ())));
         mBinding.tvLat.setText(String.valueOf(m.getLat()));
         mBinding.tvLon.setText(String.valueOf(m.getLon()));
