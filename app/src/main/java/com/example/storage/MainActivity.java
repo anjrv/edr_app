@@ -60,8 +60,9 @@ public class MainActivity extends AppCompatActivity {
 
         mBacklogIntent = new Intent(this, BacklogService.class);
         if (!sensorsRunning) {
-            if (FileUtils.list(this).size() > 0)
+            if (FileUtils.list(this).size() > 0) {
                 tryEnableBacklogs();
+            }
         } else {
             mBinding.server.setText(mSharedPreferences.getString("SERVER", String.valueOf(R.string.default_ip)));
             mBinding.session.setText(mSharedPreferences.getString("SESSION", ""));
@@ -115,7 +116,8 @@ public class MainActivity extends AppCompatActivity {
                 Measurements.sData1.clear();
                 Measurements.sData2.clear();
 
-                tryEnableBacklogs();
+                if (FileUtils.list(this).size() > 0)
+                    tryEnableBacklogs();
 
                 enableEditText(mBinding.session);
                 enableEditText(mBinding.server);
@@ -227,7 +229,11 @@ public class MainActivity extends AppCompatActivity {
         String defaultTxt = String.valueOf(mBinding.server.getText()).replaceAll(" ", "");
         if (defaultTxt.length() >= 7 && mInetAddressValidator.isValid(defaultTxt)) {
             mBacklogIntent.putExtra("SERVER", defaultTxt);
-            startService(mBacklogIntent);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(mBacklogIntent);
+            } else {
+                startService(mBacklogIntent);
+            }
         }
     }
 
@@ -279,13 +285,13 @@ public class MainActivity extends AppCompatActivity {
     private void updateUI(Measurement m) {
         if (m.getTime() == null) return;
 
-        mBinding.zValue.setText((String.valueOf(m.getZ())));
         mBinding.tvLat.setText(String.valueOf(m.getLat()));
         mBinding.tvLon.setText(String.valueOf(m.getLon()));
         mBinding.tvAccuracy.setText(String.valueOf(m.getAcc()));
         mBinding.tvAltitude.setText(String.valueOf(m.getAlt()));
         mBinding.tvSpeed.setText(String.valueOf(m.getMs()));
         mBinding.time.setText(m.getTime().replace('T', ' ').replace('Z', ' '));
+        mBinding.zValue.setText((String.valueOf(m.getZ())));
         mBinding.zFiltered.setText(String.valueOf(Math.max(m.getFz(), 0.0)));
     }
 }

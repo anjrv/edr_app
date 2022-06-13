@@ -1,5 +1,9 @@
 package com.example.storage;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -10,6 +14,7 @@ import android.os.IBinder;
 import android.os.Looper;
 
 import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
 
 import com.example.storage.data.Measurements;
 import com.example.storage.network.MessageThread;
@@ -42,6 +47,30 @@ public class BacklogService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         ctx = this;
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Intent notificationIntent = new Intent(this, MainActivity.class);
+            PendingIntent pendingIntent =
+                    PendingIntent.getActivity(this, 0, notificationIntent,
+                            PendingIntent.FLAG_IMMUTABLE);
+
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(ctx, "BACKLOG_CHANNEL")
+                    .setSmallIcon(R.drawable.ic_launcher_new_foreground)
+                    .setContentIntent(pendingIntent)
+                    .setAutoCancel(true)
+                    .setContentTitle("Eddy")
+                    .setContentText("Trying to send backlog...");
+
+            Notification notification = builder.build();
+
+            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            NotificationChannel channel = new NotificationChannel("BACKLOG_CHANNEL", "BACKLOG_CHANNEL", NotificationManager.IMPORTANCE_DEFAULT);
+            notificationManager.createNotificationChannel(channel);
+
+            notificationManager.notify(1, notification);
+
+            startForeground(1, notification);
+        }
+
         mPublisher = Mqtt.generateClient(ctx, clientId, (String) intent.getExtras().get("SERVER"));
         Mqtt.connect(mPublisher, getString(R.string.mqtt_username), getString(R.string.mqtt_password));
 
@@ -52,14 +81,14 @@ public class BacklogService extends Service {
 
     @Override
     public void onDestroy() {
-        mMessageThread.looper.quitSafely();
-        mBacklogLooper.quitSafely();
-
         mPublisher.unregisterResources();
         mPublisher.close();
         mPublisher.disconnect();
 
         Measurements.backlogHasConnection = false;
+
+        mMessageThread.looper.quitSafely();
+        mBacklogLooper.quitSafely();
 
         mMessageThread.interrupt();
         mBacklogThread.interrupt();

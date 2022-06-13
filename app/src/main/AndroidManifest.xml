@@ -36,7 +36,7 @@
         </activity>
 
         <service android:name=".SensorService" android:foregroundServiceType="location|connectedDevice"/>
-        <service android:name=".BacklogService"/>
+        <service android:name=".BacklogService" android:foregroundServiceType="connectedDevice"/>
 
     </application>
 
