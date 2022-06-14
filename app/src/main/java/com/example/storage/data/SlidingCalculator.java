@@ -55,15 +55,16 @@ public class SlidingCalculator {
         return this.mean;
     }
 
-    public double getPopulationVariance() {
+    public double getVariance() {
         return this.dSq / (double) this.w.getCount();
     }
 
-    public double getPopulationStd() {
-        return Math.sqrt(this.getPopulationVariance());
+    public double getStd() {
+        return Math.sqrt(this.getVariance());
     }
 
     static class Window {
+
         private final double[] buffer;
         private int index;
         private int count;
@@ -129,7 +130,7 @@ public class SlidingCalculator {
         }
 
         System.out.println("Means: " + findMean(test) + ", " + sc.getMean());
-        System.out.println("Std: " + findStd(test) + ", " + sc.getPopulationStd());
+        System.out.println("Std: " + findStd(test) + ", " + sc.getStd());
 
         for (int i = 0; i < 200; i++) {
             double d = rand.nextDouble();
@@ -138,6 +139,6 @@ public class SlidingCalculator {
         }
 
         System.out.println("Means: " + findMean(test) + ", " + sc.getMean());
-        System.out.println("Std: " + findStd(test) + ", " + sc.getPopulationStd());
+        System.out.println("Std: " + findStd(test) + ", " + sc.getStd());
     }
 }

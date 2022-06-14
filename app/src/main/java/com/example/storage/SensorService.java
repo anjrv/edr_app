@@ -369,11 +369,10 @@ public class SensorService extends Service implements SensorEventListener {
                 }
 
                 sc.update(fz);
-
                 double speed = Math.pow(40, 2.0 / 3);
                 double I = 5.4;
                 double denominator = 0.7 * speed * I;
-                double std = sc.getPopulationStd();
+                double std = sc.getStd();
                 double edr = std / (Math.pow(denominator, 0.5));
 
                 if (Measurements.sFirstArray) {
