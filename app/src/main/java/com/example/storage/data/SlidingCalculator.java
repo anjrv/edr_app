@@ -1,5 +1,8 @@
 package com.example.storage.data;
 
+import java.util.ArrayList;
+import java.util.Random;
+
 /**
  * Helper class for sliding window statistics using Welford's method
  */
@@ -23,7 +26,7 @@ public class SlidingCalculator {
                 this.mean = value;
                 this.dSq = 0;
             } else {
-                double meanIncrement = (value - this.mean) / this.w.getCount();
+                double meanIncrement = (value - this.mean) / (double) this.w.getCount();
                 double nextMean = this.mean + meanIncrement;
 
                 double dSqIncrement = (value - nextMean) * (value - this.mean);
@@ -33,7 +36,7 @@ public class SlidingCalculator {
                 this.dSq = nextDsq;
             }
         } else {
-            double meanIncrement = (value - oldest) / this.w.getCount();
+            double meanIncrement = (value - oldest) / (double) this.w.getCount();
             double nextMean = this.mean + meanIncrement;
 
             double dSqIncrement = (value - oldest) * (value - nextMean + oldest - this.mean);
@@ -53,7 +56,7 @@ public class SlidingCalculator {
     }
 
     public double getPopulationVariance() {
-        return this.dSq / this.w.getCount();
+        return this.dSq / (double) this.w.getCount();
     }
 
     public double getPopulationStd() {
@@ -78,15 +81,63 @@ public class SlidingCalculator {
         public Double append(double value) {
             Double oldest = null;
 
-            if (this.count >= this.buffer.length) {
+            if (this.count == this.buffer.length) {
                 oldest = this.buffer[this.index];
+            } else {
+                this.count++;
             }
 
             this.buffer[this.index] = value;
             this.index = (this.index + 1) % this.buffer.length;
-            this.count++;
 
             return oldest;
         }
+    }
+
+    private static double findMean(ArrayList<Double> nums) {
+        double sum = 0.0;
+
+        for (int i = 0; i < nums.size(); i++) {
+            sum += nums.get(i);
+        }
+
+        return sum / (double) nums.size();
+    }
+
+    private static double findStd(ArrayList<Double> nums) {
+        double mean = findMean(nums);
+
+        double squareSum = 0.0;
+
+        for (int i = 0; i < nums.size(); i++) {
+            squareSum += Math.pow(nums.get(i) - mean, 2);
+        }
+
+        return Math.sqrt(squareSum / (double) nums.size());
+    }
+
+    // Double check validity...
+    public static void main(String[] args) {
+        Random rand = new Random();
+        SlidingCalculator sc = new SlidingCalculator();
+        ArrayList<Double> test = new ArrayList<>(500);
+
+        for (int i = 0; i < 500; i++) {
+            double d = rand.nextDouble();
+            sc.update(d);
+            test.add(d);
+        }
+
+        System.out.println("Means: " + findMean(test) + ", " + sc.getMean());
+        System.out.println("Std: " + findStd(test) + ", " + sc.getPopulationStd());
+
+        for (int i = 0; i < 200; i++) {
+            double d = rand.nextDouble();
+            sc.update(d);
+            test.set(i, d);
+        }
+
+        System.out.println("Means: " + findMean(test) + ", " + sc.getMean());
+        System.out.println("Std: " + findStd(test) + ", " + sc.getPopulationStd());
     }
 }
