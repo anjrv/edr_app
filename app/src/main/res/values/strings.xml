@@ -16,5 +16,5 @@
     <string name="z_filtered">Z Filtered:</string>
     <string name="backlog_files_0">Backlog files: 0</string>
     <string name="std">STD:</string>
-    <string name="edr">EDR: 0.000</string>
+    <string name="edr">EDR: 0.000000</string>
 </resources>

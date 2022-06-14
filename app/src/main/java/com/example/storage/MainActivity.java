@@ -285,6 +285,6 @@ public class MainActivity extends AppCompatActivity {
         mBinding.zValue.setText((String.valueOf(m.getZ())));
         mBinding.zFiltered.setText(String.valueOf(Math.max(m.getFz(), 0.0)));
         mBinding.std.setText(String.valueOf(m.getStd()));
-        mBinding.edr.setText(String.format(Locale.US, "%s %.3f", "EDR:", m.getEdr()));
+        mBinding.edr.setText(String.format(Locale.US, "%s %.6f", "EDR:", m.getEdr()));
     }
 }
