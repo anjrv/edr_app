@@ -63,7 +63,7 @@ public class SlidingCalculator {
         return Math.sqrt(this.getVariance());
     }
 
-    static class Window {
+    private static class Window {
 
         private final double[] buffer;
         private int index;
