@@ -18,28 +18,6 @@ public class SlidingCalculator {
         this.w = new Window();
     }
 
-    private static double findMean(ArrayList<Double> nums) {
-        double sum = 0.0;
-
-        for (int i = 0; i < nums.size(); i++) {
-            sum += nums.get(i);
-        }
-
-        return sum / (double) nums.size();
-    }
-
-    private static double findStd(ArrayList<Double> nums) {
-        double mean = findMean(nums);
-
-        double squareSum = 0.0;
-
-        for (int i = 0; i < nums.size(); i++) {
-            squareSum += Math.pow(nums.get(i) - mean, 2);
-        }
-
-        return Math.sqrt(squareSum / (double) nums.size());
-    }
-
     public void update(double value) {
         Double oldest = this.w.append(value);
 
@@ -114,6 +92,28 @@ public class SlidingCalculator {
 
             return oldest;
         }
+    }
+
+    private static double findMean(ArrayList<Double> nums) {
+        double sum = 0.0;
+
+        for (int i = 0; i < nums.size(); i++) {
+            sum += nums.get(i);
+        }
+
+        return sum / (double) nums.size();
+    }
+
+    private static double findStd(ArrayList<Double> nums) {
+        double mean = findMean(nums);
+
+        double squareSum = 0.0;
+
+        for (int i = 0; i < nums.size(); i++) {
+            squareSum += Math.pow(nums.get(i) - mean, 2);
+        }
+
+        return Math.sqrt(squareSum / (double) nums.size());
     }
 
     // Double check validity...
