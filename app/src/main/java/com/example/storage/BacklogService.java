@@ -66,9 +66,9 @@ public class BacklogService extends Service {
             NotificationChannel channel = new NotificationChannel("BACKLOG_CHANNEL", "BACKLOG_CHANNEL", NotificationManager.IMPORTANCE_DEFAULT);
             notificationManager.createNotificationChannel(channel);
 
-            notificationManager.notify(1, notification);
+            notificationManager.notify(2, notification);
 
-            startForeground(1, notification);
+            startForeground(2, notification);
         }
 
         mPublisher = Mqtt.generateClient(ctx, clientId, (String) intent.getExtras().get("SERVER"));
@@ -111,19 +111,22 @@ public class BacklogService extends Service {
             public void run() {
                 ArrayList<String> files = FileUtils.list(ctx);
 
-                if (mPublisher != null && mPublisher.isConnected()) {
-                    Measurements.backlogHasConnection = mPublisher.isConnected();
-
-                    if (mMessageThread != null && files.size() > 0) {
-                        mMessageThread.handleFile(files.get(0), mPublisher, ctx);
-                    }
-                } else if (mPublisher != null && !mPublisher.isConnected() && NetworkUtils.isNetworkConnected(ctx))
-                    Mqtt.connect(mPublisher, getString(R.string.mqtt_username), getString(R.string.mqtt_password));
-
-                if (files.size() > 1)
-                    mBacklogHandler.postDelayed(this, mPublisher != null && mPublisher.isConnected() ? (Mqtt.TIMEOUT + 1000) : 60000);
-                else // Disconnect from within handler thread not ideal, ensure adequate time for previous message to complete
+                if (files.size() == 0) {
                     mBacklogHandler.postDelayed(() -> stopSelf(), Mqtt.TIMEOUT * 2);
+                } else {
+                    if (mPublisher != null && mPublisher.isConnected()) {
+                        Measurements.backlogHasConnection = mPublisher.isConnected();
+
+                        if (mMessageThread != null) {
+                            mMessageThread.handleFile(files.get(0), mPublisher, ctx);
+                        }
+                    } else if (mPublisher != null && !mPublisher.isConnected() && NetworkUtils.isNetworkConnected(ctx))
+                        Mqtt.connect(mPublisher, getString(R.string.mqtt_username), getString(R.string.mqtt_password));
+
+                    mBacklogHandler.postDelayed(this, mPublisher != null && mPublisher.isConnected() ? (Mqtt.TIMEOUT * 2) : 60000);
+                }
+
+
             }
         });
     }

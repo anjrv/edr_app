@@ -3,10 +3,8 @@ package com.example.storage.network;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
-import android.widget.Toast;
 
 import com.example.storage.data.Dataframe;
-import com.example.storage.data.Measurements;
 import com.example.storage.utils.FileUtils;
 import com.example.storage.utils.JsonConverter;
 import com.example.storage.utils.ZipUtils;
@@ -56,9 +54,9 @@ public class MessageThread extends Thread {
             try {
                 byte[] data = FileUtils.retrieve(name, c);
                 if (data.length == 0) {
-                   // Nothing?
-                   FileUtils.delete(name, c);
-                   return;
+                    // Nothing?
+                    FileUtils.delete(name, c);
+                    return;
                 }
 
                 IMqttDeliveryToken token = Mqtt.publish(mqtt, "EDR", data);
@@ -96,11 +94,9 @@ public class MessageThread extends Thread {
                     try {
                         token.waitForCompletion(Mqtt.TIMEOUT);
 
-                        if (token.getException() != null) {
+                        // Timeout will throw, other possible exceptions just get set in token
+                        if (token.getException() != null)
                             writeMsg(d.getData().get(d.getData().size() - 1).getTime(), msg, c);
-                        } else {
-                            // Toast.makeText(c, "Measurements sent over MQTT", Toast.LENGTH_SHORT).show();
-                        }
                     } catch (Exception e) {
                         writeMsg(d.getData().get(d.getData().size() - 1).getTime(), msg, c);
                     }

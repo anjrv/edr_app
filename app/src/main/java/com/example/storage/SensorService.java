@@ -41,7 +41,6 @@ import com.google.android.gms.location.LocationServices;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -163,23 +162,6 @@ public class SensorService extends Service implements SensorEventListener {
         mPublisher = Mqtt.generateClient(this, clientId, (String) intent.getExtras().get("SERVER"));
         Mqtt.connect(mPublisher, getString(R.string.mqtt_username), getString(R.string.mqtt_password));
 
-        final Handler handler = new Handler(mLocationLooper); // Reuse location looper, it's not very busy
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                if (mPublisher != null && mPublisher.isConnected()) {
-                    ArrayList<String> files = FileUtils.list(ctx);
-
-                    if (mMessageThread != null && files.size() > 0) {
-                        mMessageThread.handleFile(files.get(0), mPublisher, ctx);
-                    }
-                }
-
-                // Queue more messages if MessageThread isn't being used
-                handler.postDelayed(this, 60000);
-            }
-        });
-
         if (mFusedLocationProviderClient == null)
             mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(ctx);
         else
@@ -292,7 +274,7 @@ public class SensorService extends Service implements SensorEventListener {
                     return;
                 }
 
-                double fz = 0.0;
+                double fz;
 
                 final double b0 = 1;
                 final double b1 = 2;

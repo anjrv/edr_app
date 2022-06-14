@@ -18,18 +18,13 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
-import com.example.storage.data.Dataframe;
 import com.example.storage.data.Measurement;
 import com.example.storage.data.Measurements;
 import com.example.storage.databinding.ActivityMainBinding;
 import com.example.storage.utils.FileUtils;
-import com.example.storage.utils.JsonConverter;
-import com.example.storage.utils.ZipUtils;
 
 import org.apache.commons.validator.routines.InetAddressValidator;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -96,22 +91,7 @@ public class MainActivity extends AppCompatActivity {
                         .apply();
             } else {
                 getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
                 stopService(sensorIntent);
-
-                try {
-                    List<Measurement> data = Measurements.firstArray ? Measurements.sData1.subList(0, Measurements.currIdx) :
-                            Measurements.sData2.subList(0, Measurements.currIdx);
-
-                    if (data.size() > 0) {
-                        final Dataframe d = new Dataframe(Build.BRAND, Build.MANUFACTURER, Build.MODEL, Build.ID, Build.VERSION.RELEASE, String.valueOf(mBinding.session.getText()), data);
-                        final byte[] msg = ZipUtils.compress(JsonConverter.convert(d));
-
-                        FileUtils.write(d.getData().get(0).getTime(), msg, this);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
 
                 Measurements.sData1.clear();
                 Measurements.sData2.clear();
