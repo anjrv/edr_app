@@ -93,7 +93,7 @@ public class SensorService extends Service implements SensorEventListener {
         mLocationThread.start();
 
         mLocationLooper = mLocationThread.getLooper();
-        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getApplicationContext());
 
         mLocationRequest = LocationRequest.create()
                 .setInterval(1000)
@@ -115,21 +115,17 @@ public class SensorService extends Service implements SensorEventListener {
     }
 
     @Override
+    @SuppressLint("MissingPermission") // This permission should be obtained on activity creation
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions((Activity) getBaseContext(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 99);
-        }
-
         ctx = this;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Intent notificationIntent = new Intent(this, MainActivity.class);
             PendingIntent pendingIntent =
-                    PendingIntent.getActivity(this, 0, notificationIntent,
+                    PendingIntent.getActivity(getApplicationContext(), 0, notificationIntent,
                             PendingIntent.FLAG_IMMUTABLE);
 
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(ctx, "SENSOR_CHANNEL")
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), "SENSOR_CHANNEL")
                     .setSmallIcon(R.drawable.ic_launcher_new_foreground)
                     .setContentIntent(pendingIntent)
                     .setAutoCancel(true)
@@ -159,11 +155,11 @@ public class SensorService extends Service implements SensorEventListener {
 
         mSession = (String) intent.getExtras().get("SESSION");
 
-        mPublisher = Mqtt.generateClient(this, clientId, (String) intent.getExtras().get("SERVER"));
+        mPublisher = Mqtt.generateClient(getApplicationContext(), clientId, (String) intent.getExtras().get("SERVER"));
         Mqtt.connect(mPublisher, getString(R.string.mqtt_username), getString(R.string.mqtt_password));
 
         if (mFusedLocationProviderClient == null)
-            mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(ctx);
+            mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getApplicationContext());
         else
             mFusedLocationProviderClient
                     .requestLocationUpdates(mLocationRequest, mLocationCallback, mLocationLooper);
@@ -213,10 +209,10 @@ public class SensorService extends Service implements SensorEventListener {
         d.setData(first ? Measurements.sData1.subList(0, idx) :
                 Measurements.sData2.subList(0, idx));
 
-        mMessageThread.handleMessage(d, mPublisher, this);
+        mMessageThread.handleMessage(d, mPublisher, getApplicationContext());
 
         // Give the connection a kick
-        if (mPublisher != null && !mPublisher.isConnected() && NetworkUtils.isNetworkConnected(ctx))
+        if (mPublisher != null && !mPublisher.isConnected() && NetworkUtils.isNetworkConnected(getApplicationContext()))
             Mqtt.connect(mPublisher, getString(R.string.mqtt_username), getString(R.string.mqtt_password));
     }
 

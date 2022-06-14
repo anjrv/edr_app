@@ -31,7 +31,6 @@ public class BacklogService extends Service {
     private MqttAndroidClient mPublisher;
     private MessageThread mMessageThread;
     private HandlerThread mBacklogThread;
-    private Context ctx;
     private Looper mBacklogLooper;
     private Handler mBacklogHandler;
 
@@ -45,15 +44,13 @@ public class BacklogService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        ctx = this;
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Intent notificationIntent = new Intent(this, MainActivity.class);
             PendingIntent pendingIntent =
-                    PendingIntent.getActivity(this, 0, notificationIntent,
+                    PendingIntent.getActivity(getApplicationContext(), 0, notificationIntent,
                             PendingIntent.FLAG_IMMUTABLE);
 
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(ctx, "BACKLOG_CHANNEL")
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), "BACKLOG_CHANNEL")
                     .setSmallIcon(R.drawable.ic_launcher_new_foreground)
                     .setContentIntent(pendingIntent)
                     .setAutoCancel(true)
@@ -71,7 +68,7 @@ public class BacklogService extends Service {
             startForeground(2, notification);
         }
 
-        mPublisher = Mqtt.generateClient(ctx, clientId, (String) intent.getExtras().get("SERVER"));
+        mPublisher = Mqtt.generateClient(this, clientId, (String) intent.getExtras().get("SERVER"));
         Mqtt.connect(mPublisher, getString(R.string.mqtt_username), getString(R.string.mqtt_password));
 
         scheduleBacklogs();
@@ -81,17 +78,17 @@ public class BacklogService extends Service {
 
     @Override
     public void onDestroy() {
-        mPublisher.unregisterResources();
-        mPublisher.close();
-        mPublisher.disconnect();
-
-        Measurements.backlogHasConnection = false;
-
         mMessageThread.looper.quitSafely();
         mBacklogLooper.quitSafely();
 
         mMessageThread.interrupt();
         mBacklogThread.interrupt();
+
+        mPublisher.unregisterResources();
+        mPublisher.close();
+        mPublisher.disconnect();
+
+        Measurements.backlogHasConnection = false;
 
         super.onDestroy();
     }
@@ -109,7 +106,7 @@ public class BacklogService extends Service {
         mBacklogHandler.post(new Runnable() {
             @Override
             public void run() {
-                ArrayList<String> files = FileUtils.list(ctx);
+                ArrayList<String> files = FileUtils.list(getApplicationContext());
 
                 if (files.size() == 0) {
                     mBacklogHandler.postDelayed(() -> stopSelf(), Mqtt.TIMEOUT * 2);
@@ -118,9 +115,9 @@ public class BacklogService extends Service {
                         Measurements.backlogHasConnection = mPublisher.isConnected();
 
                         if (mMessageThread != null) {
-                            mMessageThread.handleFile(files.get(0), mPublisher, ctx);
+                            mMessageThread.handleFile(files.get(0), mPublisher, getApplicationContext());
                         }
-                    } else if (mPublisher != null && !mPublisher.isConnected() && NetworkUtils.isNetworkConnected(ctx))
+                    } else if (mPublisher != null && !mPublisher.isConnected() && NetworkUtils.isNetworkConnected(getApplicationContext()))
                         Mqtt.connect(mPublisher, getString(R.string.mqtt_username), getString(R.string.mqtt_password));
 
                     mBacklogHandler.postDelayed(this, mPublisher != null && mPublisher.isConnected() ? (Mqtt.TIMEOUT * 2) : 60000);
