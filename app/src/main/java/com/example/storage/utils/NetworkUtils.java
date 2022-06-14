@@ -31,10 +31,6 @@ public class NetworkUtils {
 
     public static boolean isNetworkConnected(Context context) {
         int networkStatus = getConnectivityStatus(context);
-        if (networkStatus == TYPE_WIFI || networkStatus == TYPE_MOBILE) {
-            return true;
-        } else {
-            return false;
-        }
+        return networkStatus == TYPE_WIFI || networkStatus == TYPE_MOBILE;
     }
 }

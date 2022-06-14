@@ -32,59 +32,59 @@ public class Dataframe implements Serializable {
         this.data = data;
     }
 
-    public void setBrand(String brand) {
-        this.brand = brand;
-    }
-
-    public void setManufacturer(String manufacturer) {
-        this.manufacturer = manufacturer;
-    }
-
-    public void setModel(String model) {
-        this.model = model;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
-    }
-
-    public void setSession(String session) {
-        this.session = session;
-    }
-
-    public void setData(List<Measurement> data) {
-        this.data = data;
-    }
-
     public String getBrand() {
         return brand;
+    }
+
+    public void setBrand(String brand) {
+        this.brand = brand;
     }
 
     public String getManufacturer() {
         return manufacturer;
     }
 
+    public void setManufacturer(String manufacturer) {
+        this.manufacturer = manufacturer;
+    }
+
     public String getModel() {
         return model;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
     }
 
     public String getId() {
         return id;
     }
 
+    public void setId(String id) {
+        this.id = id;
+    }
+
     public String getVersion() {
         return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
     }
 
     public String getSession() {
         return session;
     }
 
+    public void setSession(String session) {
+        this.session = session;
+    }
+
     public List<Measurement> getData() {
         return data;
+    }
+
+    public void setData(List<Measurement> data) {
+        this.data = data;
     }
 }

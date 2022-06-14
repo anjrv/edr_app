@@ -28,14 +28,15 @@ import com.example.storage.utils.ZipUtils;
 
 import org.apache.commons.validator.routines.InetAddressValidator;
 
+import java.text.MessageFormat;
 import java.util.List;
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
     private final InetAddressValidator mInetAddressValidator = InetAddressValidator.getInstance();
     private final int PERMISSION_FINE_LOCATION = 99;
-    private int mApproxRefresh;
     private SharedPreferences mSharedPreferences;
     private Intent mBacklogIntent;
     private ActivityMainBinding mBinding;
@@ -98,8 +99,8 @@ public class MainActivity extends AppCompatActivity {
                 stopService(sensorIntent);
 
                 try {
-                    List<Measurement> data = Measurements.firstArray ? Measurements.sData1.subList(0, Measurements.currIdx) :
-                            Measurements.sData2.subList(0, Measurements.currIdx);
+                    List<Measurement> data = Measurements.sFirstArray ? Measurements.DATA_1.subList(0, Measurements.sCurrIdx) :
+                            Measurements.DATA_2.subList(0, Measurements.sCurrIdx);
 
                     if (data.size() > 0) {
                         final Dataframe d = new Dataframe(Build.BRAND, Build.MANUFACTURER, Build.MODEL, Build.ID, Build.VERSION.RELEASE, String.valueOf(mBinding.session.getText()), data);
@@ -110,8 +111,8 @@ public class MainActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
 
-                Measurements.sData1.clear();
-                Measurements.sData2.clear();
+                Measurements.DATA_1.clear();
+                Measurements.DATA_2.clear();
 
                 if (FileUtils.list(this).size() > 0)
                     tryEnableBacklogs();
@@ -120,14 +121,6 @@ public class MainActivity extends AppCompatActivity {
                 enableEditText(mBinding.server);
             }
         });
-
-        mApproxRefresh = 1000;
-        // if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-        //     mApproxRefresh = (int) (1000 / this.getDisplay().getRefreshRate()) + 1;
-        // } else {
-        //     // Assume 60fps ish, rounded up
-        //     mApproxRefresh = 17;
-        // }
 
         mViewTimer = new Timer();
         scheduleUITimer();
@@ -257,23 +250,24 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 // Reflect connection changes even if not measuring
-                runOnUiThread(() -> mBinding.connectionLabel.
-                        setText((Measurements.sensorHasConnection || Measurements.backlogHasConnection) ?
-                                getString(R.string.connection_succeeded) :
-                                getString(R.string.connection_failed)));
+                runOnUiThread(() -> {
+                    mBinding.backlogLabel.setText(MessageFormat.format("Backlog files: {0}", FileUtils.list(getApplicationContext()).size()));
+                    mBinding.connectionLabel.
+                            setText((Measurements.sSensorHasConnection || Measurements.sBacklogHasConnection) ?
+                                    getString(R.string.connection_succeeded) :
+                                    getString(R.string.connection_failed));
 
-                if (mBinding.switchBtn.isChecked()) {
-                    runOnUiThread(() -> {
-                        if (Measurements.currIdx > 1) { // Current index to write to, read one back
-                            if (Measurements.firstArray) {
-                                updateUI(Measurements.sData1.get(Measurements.currIdx - 1));
+                    if (mBinding.switchBtn.isChecked()) {
+                        if (Measurements.sCurrIdx > 1) { // Current index to write to, read one back
+                            if (Measurements.sFirstArray) {
+                                updateUI(Measurements.DATA_1.get(Measurements.sCurrIdx - 1));
                             } else
-                                updateUI(Measurements.sData2.get(Measurements.currIdx - 1));
+                                updateUI(Measurements.DATA_2.get(Measurements.sCurrIdx - 1));
                         }
-                    });
-                }
+                    }
+                });
             }
-        }, 0, mApproxRefresh);
+        }, 0, 1000);
     }
 
     /**
@@ -290,5 +284,7 @@ public class MainActivity extends AppCompatActivity {
         mBinding.time.setText(m.getTime().replace('T', ' ').replace('Z', ' '));
         mBinding.zValue.setText((String.valueOf(m.getZ())));
         mBinding.zFiltered.setText(String.valueOf(Math.max(m.getFz(), 0.0)));
+        mBinding.std.setText(String.valueOf(m.getStd()));
+        mBinding.edr.setText(String.format(Locale.US, "%s %.3f", "EDR:", m.getEdr()));
     }
 }

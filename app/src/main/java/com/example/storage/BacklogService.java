@@ -88,7 +88,7 @@ public class BacklogService extends Service {
         mPublisher.close();
         mPublisher.disconnect();
 
-        Measurements.backlogHasConnection = false;
+        Measurements.sBacklogHasConnection = false;
 
         super.onDestroy();
     }
@@ -112,7 +112,7 @@ public class BacklogService extends Service {
                     mBacklogHandler.postDelayed(() -> stopSelf(), Mqtt.TIMEOUT * 2);
                 } else {
                     if (mPublisher != null && mPublisher.isConnected()) {
-                        Measurements.backlogHasConnection = mPublisher.isConnected();
+                        Measurements.sBacklogHasConnection = mPublisher.isConnected();
 
                         if (mMessageThread != null) {
                             mMessageThread.handleFile(files.get(0), mPublisher, getApplicationContext());

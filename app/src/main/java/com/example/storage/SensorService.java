@@ -1,8 +1,6 @@
 package com.example.storage;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -10,7 +8,6 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -23,12 +20,12 @@ import android.os.Looper;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 
 import com.example.storage.data.Dataframe;
 import com.example.storage.data.Measurement;
 import com.example.storage.data.Measurements;
+import com.example.storage.data.SlidingCalculator;
 import com.example.storage.network.MessageThread;
 import com.example.storage.network.Mqtt;
 import com.example.storage.utils.FileUtils;
@@ -49,10 +46,10 @@ import info.mqtt.android.service.MqttAndroidClient;
 public class SensorService extends Service implements SensorEventListener {
     private static final String clientId = Build.BRAND + "_" + Build.ID + "_SENSORS";
     private static final Dataframe d = new Dataframe();
+    private SlidingCalculator sc;
     private MqttAndroidClient mPublisher;
     private SensorManager mSensorManager;
     private MessageThread mMessageThread;
-    private Context ctx;
     private Thread mCallbackThread;
     private Handler mCallbackHandler;
     private Looper mCallbackLooper;
@@ -117,8 +114,6 @@ public class SensorService extends Service implements SensorEventListener {
     @Override
     @SuppressLint("MissingPermission") // This permission should be obtained on activity creation
     public int onStartCommand(Intent intent, int flags, int startId) {
-        ctx = this;
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Intent notificationIntent = new Intent(this, MainActivity.class);
             PendingIntent pendingIntent =
@@ -145,13 +140,13 @@ public class SensorService extends Service implements SensorEventListener {
 
         // Preallocate all memory
         for (int i = 0; i < 10000; i++) {
-            Measurements.sData1.add(new Measurement());
-            Measurements.sData2.add(new Measurement());
+            Measurements.DATA_1.add(new Measurement());
+            Measurements.DATA_2.add(new Measurement());
         }
 
-        Measurements.consecutiveMeasurements = 0;
-        Measurements.currIdx = 0;
-        Measurements.firstArray = true;
+        sc = new SlidingCalculator();
+        Measurements.sCurrIdx = 0;
+        Measurements.sFirstArray = true;
 
         mSession = (String) intent.getExtras().get("SESSION");
 
@@ -191,7 +186,7 @@ public class SensorService extends Service implements SensorEventListener {
         mPublisher.close();
         mPublisher.disconnect();
 
-        Measurements.sensorHasConnection = false;
+        Measurements.sSensorHasConnection = false;
 
         super.onDestroy();
     }
@@ -206,8 +201,8 @@ public class SensorService extends Service implements SensorEventListener {
         d.setId(Build.ID);
         d.setVersion(Build.VERSION.RELEASE);
         d.setSession(mSession);
-        d.setData(first ? Measurements.sData1.subList(0, idx) :
-                Measurements.sData2.subList(0, idx));
+        d.setData(first ? Measurements.DATA_1.subList(0, idx) :
+                Measurements.DATA_2.subList(0, idx));
 
         mMessageThread.handleMessage(d, mPublisher, getApplicationContext());
 
@@ -220,7 +215,7 @@ public class SensorService extends Service implements SensorEventListener {
     @SuppressLint("SimpleDateFormat")
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            Measurements.sensorHasConnection = mPublisher.isConnected();
+            Measurements.sSensorHasConnection = mPublisher.isConnected();
             DateFormat isoDate = new SimpleDateFormat(FileUtils.ISO_DATE);
             isoDate.setTimeZone(TimeZone.getTimeZone("UTC"));
 
@@ -266,142 +261,155 @@ public class SensorService extends Service implements SensorEventListener {
          */
         public void handleMeasurement(float zAcc, String time) {
             handler.post(() -> {
-                if (Measurements.sLongitude == Double.NEGATIVE_INFINITY || Measurements.sData1.size() == 0 || Measurements.sData2.size() == 0) {
+                if (Measurements.sLongitude == Double.NEGATIVE_INFINITY || Measurements.DATA_1.size() == 0 || Measurements.DATA_2.size() == 0) {
                     return;
                 }
 
                 double fz;
 
-                final double b0 = 1;
-                final double b1 = 2;
-                final double a1 = -1.94921595802584;
-                final double b01 = 1;
-                final double b11 = 2;
-                final double a11 = -1.88660958262151;
-                final double b02 = 1;
-                final double b12 = -2;
-                final double a12 = -1.999037095803727126;
-                final double b03 = 1;
-                final double b13 = -2;
-                final double a13 = -1.99767915341159740;
+                double b0 = 1;
+                double b1 = 2;
+                double b2 = 1;
+                double a1 = -1.94921595802584;
+                double a2 = 0.953069895327891;
 
-                final double zWeight = 0.000963484325512291;
-                final double xWeight = 0.000932538415629474;
-                final double yWeight = 0.999518942496229523;
-                final double wWeight = 0.998839971032117524;
+                double b01 = 1;
+                double b11 = 2;
+                double b21 = 1;
+                double a11 = -1.88660958262151;
+                double a21 = 0.890339736284024;
 
-                if (Measurements.consecutiveMeasurements == 0) {
-                    Measurements.zVal[0] = zAcc;
-                    Measurements.z[0] = (b0 * Measurements.zVal[0]) * zWeight;
-                    Measurements.x[0] = (b01 * Measurements.z[0]) * xWeight;
-                    Measurements.y[0] = (b02 * Measurements.x[0]) * yWeight;
-                    Measurements.w[0] = (b03 * Measurements.y[0]) * wWeight;
+                double b02 = 1;
+                double b12 = -2;
+                double b22 = 1;
+                double a12 = -1.999037095803727126;
+                double a22 = 0.9990386741811910775;
 
-                    fz = Measurements.w[0];
-                } else if (Measurements.consecutiveMeasurements == 1) {
-                    Measurements.zVal[1] = zAcc;
+                double b03 = 1;
+                double b13 = -2;
+                double b23 = 1;
+                double a13 = -1.99767915341159740;
+                double a23 = 0.997680730716872465;
 
-                    Measurements.z[1] = (b0 * Measurements.zVal[1] + b1 * Measurements.zVal[0]
-                            - a1 * Measurements.z[0]) * zWeight;
+                final double gain1 = 0.000963484325512291;
+                final double gain2 = 0.000932538415629474;
+                final double gain3 = 0.999518942496229523;
+                final double gain4 = 0.998839971032117524;
 
-                    Measurements.x[1] = (b01 * Measurements.z[1] + b11 * Measurements.z[0]
-                            - a11 * Measurements.x[0]) * xWeight;
+                if (sc.getCount() == 0) {
+                    Measurements.Z_VAL[0] = zAcc;
+                    Measurements.Z[0] = (b0 * Measurements.Z_VAL[0]) * gain1;
+                    Measurements.X[0] = (b01 * Measurements.Z[0]) * gain2;
+                    Measurements.Y[0] = (b02 * Measurements.X[0]) * gain3;
+                    Measurements.W[0] = (b03 * Measurements.Y[0]) * gain4;
 
-                    Measurements.y[1] = (b02 * Measurements.x[1] + b12 * Measurements.x[0]
-                            - a12 * Measurements.y[0]) * yWeight;
+                    fz = Measurements.W[0];
+                } else if (sc.getCount() == 1) {
+                    Measurements.Z_VAL[1] = zAcc;
 
-                    Measurements.w[1] = (b03 * Measurements.y[1] + b13 * Measurements.y[0]
-                            - a13 * Measurements.w[0]) * wWeight;
+                    Measurements.Z[1] = (b0 * Measurements.Z_VAL[1] + b1 * Measurements.Z_VAL[0]
+                            - a1 * Measurements.Z[0]) * gain1;
 
-                    fz = Measurements.w[1];
+                    Measurements.X[1] = (b01 * Measurements.Z[1] + b11 * Measurements.Z[0]
+                            - a11 * Measurements.X[0]) * gain2;
+
+                    Measurements.Y[1] = (b02 * Measurements.X[1] + b12 * Measurements.X[0]
+                            - a12 * Measurements.Y[0]) * gain3;
+
+                    Measurements.W[1] = (b03 * Measurements.Y[1] + b13 * Measurements.Y[0]
+                            - a13 * Measurements.W[0]) * gain4;
+
+                    fz = Measurements.W[1];
                 } else {
-                    final double b2 = 1;
-                    final double a2 = 0.953069895327891;
-                    final double b21 = 1;
-                    final double a21 = 0.890339736284024;
-                    final double b22 = 1;
-                    final double a22 = 0.9990386741811910775;
-                    final double b23 = 1;
-                    final double a23 = 0.997680730716872465;
 
-                    if (Measurements.consecutiveMeasurements > 2) {
+
+                    if (sc.getCount() > 2) {
                         // Shift running stats to the left
-                        Measurements.zVal[0] = Measurements.zVal[1];
-                        Measurements.zVal[1] = Measurements.zVal[2];
+                        Measurements.Z_VAL[0] = Measurements.Z_VAL[1];
+                        Measurements.Z_VAL[1] = Measurements.Z_VAL[2];
 
-                        Measurements.z[0] = Measurements.z[1];
-                        Measurements.z[1] = Measurements.z[2];
+                        Measurements.Z[0] = Measurements.Z[1];
+                        Measurements.Z[1] = Measurements.Z[2];
 
-                        Measurements.x[0] = Measurements.x[1];
-                        Measurements.x[1] = Measurements.x[2];
+                        Measurements.X[0] = Measurements.X[1];
+                        Measurements.X[1] = Measurements.X[2];
 
-                        Measurements.y[0] = Measurements.y[1];
-                        Measurements.y[1] = Measurements.y[2];
+                        Measurements.Y[0] = Measurements.Y[1];
+                        Measurements.Y[1] = Measurements.Y[2];
 
-                        Measurements.w[0] = Measurements.w[1];
-                        Measurements.w[1] = Measurements.w[2];
+                        Measurements.W[0] = Measurements.W[1];
+                        Measurements.W[1] = Measurements.W[2];
                     }
 
-                    Measurements.zVal[2] = zAcc;
+                    Measurements.Z_VAL[2] = zAcc;
 
-                    double zData = (b0 * Measurements.zVal[2]
-                            + b1 * Measurements.zVal[1]
-                            + b2 * Measurements.zVal[0]
-                            - (a1) * Measurements.z[1] - (a2) * Measurements.z[0]);
+                    double zData = (b0 * Measurements.Z_VAL[2]
+                            + b1 * Measurements.Z_VAL[1]
+                            + b2 * Measurements.Z_VAL[0]
+                            - (a1) * Measurements.Z[1] - (a2) * Measurements.Z[0]);
 
-                    Measurements.z[2] = zData * zWeight;
+                    Measurements.Z[2] = zData * gain1;
 
-                    double xData = (b01 * Measurements.z[2] + b11 * Measurements.z[1]
-                            + b21 * Measurements.z[0] - a11 * Measurements.x[1] - a21 * Measurements.x[0]);
+                    double xData = (b01 * Measurements.Z[2] + b11 * Measurements.Z[1]
+                            + b21 * Measurements.Z[0] - a11 * Measurements.X[1] - a21 * Measurements.X[0]);
 
-                    Measurements.x[2] = xData * xWeight;
+                    Measurements.X[2] = xData * gain2;
 
-                    double yData = (b02 * Measurements.x[2] + b12 * Measurements.x[1]
-                            + b22 * Measurements.x[0] - a12 * Measurements.y[1] - a22 * Measurements.y[0]);
+                    double yData = (b02 * Measurements.X[2] + b12 * Measurements.X[1]
+                            + b22 * Measurements.X[0] - a12 * Measurements.Y[1] - a22 * Measurements.Y[0]);
 
-                    Measurements.y[2] = yData * yWeight;
+                    Measurements.Y[2] = yData * gain3;
 
-                    double wData = (b03 * Measurements.y[2] + b13 * Measurements.y[1]
-                            + b23 * Measurements.y[0] - a13 * Measurements.w[1] - a23 * Measurements.w[0]);
+                    double wData = (b03 * Measurements.Y[2] + b13 * Measurements.Y[1]
+                            + b23 * Measurements.Y[0] - a13 * Measurements.W[1] - a23 * Measurements.W[0]);
 
-                    Measurements.w[2] = wData * wWeight;
+                    Measurements.W[2] = wData * gain4;
 
-                    fz = Measurements.w[2];
+                    fz = Measurements.W[2];
                 }
 
-                int tmp = Measurements.consecutiveMeasurements;
-                Measurements.consecutiveMeasurements = tmp + 1;
+                sc.update(fz);
 
-                if (Measurements.firstArray) {
-                    if (Measurements.currIdx >= 10000) {
-                        flushMessages(true, Measurements.currIdx);
-                        Measurements.firstArray = false;
-                        Measurements.currIdx = 0;
+                double speed = Math.pow(40, 2.0 / 3);
+                double I = 5.4;
+                double denominator = 0.7 * speed * I;
+                double std = sc.getPopulationStd();
+                double edr = std / (Math.pow(denominator, 0.5));
+
+                if (Measurements.sFirstArray) {
+                    if (Measurements.sCurrIdx >= 10000) {
+                        flushMessages(true, Measurements.sCurrIdx);
+                        Measurements.sFirstArray = false;
+                        Measurements.sCurrIdx = 0;
                     }
                 } else {
-                    if (Measurements.currIdx >= 10000) {
-                        flushMessages(false, Measurements.currIdx);
-                        Measurements.firstArray = true;
-                        Measurements.currIdx = 0;
+                    if (Measurements.sCurrIdx >= 10000) {
+                        flushMessages(false, Measurements.sCurrIdx);
+                        Measurements.sFirstArray = true;
+                        Measurements.sCurrIdx = 0;
                     }
                 }
 
                 // Pull a pointer instead of creating a new allocation
-                Measurement m = Measurements.firstArray ?
-                        Measurements.sData1.get(Measurements.currIdx) :
-                        Measurements.sData2.get(Measurements.currIdx);
+                Measurement m = Measurements.sFirstArray ?
+                        Measurements.DATA_1.get(Measurements.sCurrIdx) :
+                        Measurements.DATA_2.get(Measurements.sCurrIdx);
 
-                m.setZ(zAcc);
-                m.setTime(time);
-                m.setLon(Measurements.sLongitude);
-                m.setLat(Measurements.sLatitude);
-                m.setAlt(Measurements.sAltitude);
-                m.setMs(Measurements.sSpeed);
-                m.setAcc(Measurements.sAccuracy);
-                m.setFz(fz);
+                if (m != null) { // Immediate exit may clear the array
+                    m.setZ(zAcc);
+                    m.setFz(fz);
+                    m.setStd(std);
+                    m.setEdr(edr);
+                    m.setTime(time);
+                    m.setLon(Measurements.sLongitude);
+                    m.setLat(Measurements.sLatitude);
+                    m.setAlt(Measurements.sAltitude);
+                    m.setMs(Measurements.sSpeed);
+                    m.setAcc(Measurements.sAccuracy);
 
-                int idx = Measurements.currIdx;
-                Measurements.currIdx = idx + 1;
+                    int idx = Measurements.sCurrIdx;
+                    Measurements.sCurrIdx = idx + 1;
+                }
             });
         }
     }

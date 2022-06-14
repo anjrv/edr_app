@@ -14,4 +14,7 @@
     <string name="gps_accuracy">GPS Accuracy:</string>
     <string name="z_acceleration">Z Acceleration:</string>
     <string name="z_filtered">Z Filtered:</string>
+    <string name="backlog_files_0">Backlog files: 0</string>
+    <string name="std">STD:</string>
+    <string name="edr">EDR: 0.000</string>
 </resources>
