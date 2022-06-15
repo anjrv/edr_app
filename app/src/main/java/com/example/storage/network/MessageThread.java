@@ -17,6 +17,7 @@ import info.mqtt.android.service.MqttAndroidClient;
 /**
  * Thread instance containing additional methods to handle measurement data
  */
+@SuppressWarnings("unused")
 public class MessageThread extends Thread {
     public Looper looper;
     public Handler handler;
@@ -33,7 +34,6 @@ public class MessageThread extends Thread {
 
     private void writeMsg(String name, byte[] msg, Context c) {
         FileUtils.write(name, msg, c);
-        // Toast.makeText(c, "Measurements written to backlog", Toast.LENGTH_SHORT).show();
     }
 
     /**

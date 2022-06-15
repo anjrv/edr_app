@@ -35,7 +35,7 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".SensorService" android:foregroundServiceType="location|connectedDevice"/>
+        <service android:name=".SensorService" android:foregroundServiceType="location"/>
         <service android:name=".BacklogService" android:foregroundServiceType="connectedDevice"/>
 
     </application>

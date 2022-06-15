@@ -16,7 +16,6 @@ public class Measurements {
     public static final Double[] W = new Double[3];
     public static final ArrayList<Measurement> DATA_1 = new ArrayList<>(10000);
     public static final ArrayList<Measurement> DATA_2 = new ArrayList<>(10000);
-    public static volatile boolean sSensorHasConnection = false;
     public static volatile boolean sBacklogHasConnection = false;
     public static volatile double sLongitude = Double.NEGATIVE_INFINITY; // Canary to check write
     public static volatile double sLatitude = Double.MIN_VALUE;

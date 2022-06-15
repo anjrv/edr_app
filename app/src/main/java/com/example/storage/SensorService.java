@@ -17,6 +17,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.PowerManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -26,10 +27,10 @@ import com.example.storage.data.Dataframe;
 import com.example.storage.data.Measurement;
 import com.example.storage.data.Measurements;
 import com.example.storage.data.SlidingCalculator;
-import com.example.storage.network.MessageThread;
-import com.example.storage.network.Mqtt;
 import com.example.storage.utils.FileUtils;
-import com.example.storage.utils.NetworkUtils;
+import com.example.storage.utils.JsonConverter;
+import com.example.storage.utils.ZipUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -41,20 +42,19 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
-import info.mqtt.android.service.MqttAndroidClient;
-
 public class SensorService extends Service implements SensorEventListener {
-    private static final String clientId = Build.BRAND + "_" + Build.ID + "_SENSORS";
     private static final Dataframe d = new Dataframe();
-    private SlidingCalculator sc;
-    private MqttAndroidClient mPublisher;
+    private PowerManager.WakeLock mWakeLock;
+    private SlidingCalculator mCalculator;
     private SensorManager mSensorManager;
-    private MessageThread mMessageThread;
     private Thread mCallbackThread;
     private Handler mCallbackHandler;
     private Looper mCallbackLooper;
     private HandlerThread mLocationThread;
     private Looper mLocationLooper;
+    private HandlerThread mFileThread;
+    private Looper mFileLooper;
+    private Handler mFileHandler;
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private LocationRequest mLocationRequest;
     private LocationCallback mLocationCallback;
@@ -67,8 +67,10 @@ public class SensorService extends Service implements SensorEventListener {
 
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 
-        mMessageThread = new MessageThread();
-        mMessageThread.start();
+        mFileThread = new HandlerThread("files");
+        mFileThread.start();
+        mFileLooper = mFileThread.getLooper();
+        mFileHandler = new Handler(mFileLooper);
 
         mMathThread = new MathThread();
         mMathThread.start();
@@ -109,10 +111,15 @@ public class SensorService extends Service implements SensorEventListener {
                 Measurements.sAccuracy = locationResult.getLastLocation().getAccuracy();
             }
         };
+
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                "MyApp::SensorWakeLock");
     }
 
     @Override
-    @SuppressLint("MissingPermission") // This permission should be obtained on activity creation
+    @SuppressLint({"MissingPermission", "WakelockTimeout"})
+    // This permission should be obtained on activity creation
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Intent notificationIntent = new Intent(this, MainActivity.class);
@@ -123,7 +130,7 @@ public class SensorService extends Service implements SensorEventListener {
             NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), "SENSOR_CHANNEL")
                     .setSmallIcon(R.drawable.ic_launcher_new_foreground)
                     .setContentIntent(pendingIntent)
-                    .setAutoCancel(true)
+                    .setAutoCancel(false)
                     .setContentTitle("Eddy")
                     .setContentText("Measurements ongoing...");
 
@@ -144,14 +151,11 @@ public class SensorService extends Service implements SensorEventListener {
             Measurements.DATA_2.add(new Measurement());
         }
 
-        sc = new SlidingCalculator();
+        mCalculator = new SlidingCalculator();
         Measurements.sCurrIdx = 0;
         Measurements.sFirstArray = true;
 
         mSession = (String) intent.getExtras().get("SESSION");
-
-        mPublisher = Mqtt.generateClient(getApplicationContext(), clientId, (String) intent.getExtras().get("SERVER"));
-        Mqtt.connect(mPublisher, getString(R.string.mqtt_username), getString(R.string.mqtt_password));
 
         if (mFusedLocationProviderClient == null)
             mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getApplicationContext());
@@ -161,6 +165,8 @@ public class SensorService extends Service implements SensorEventListener {
 
         mSensorManager
                 .registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), 2000, mCallbackHandler);
+
+        mWakeLock.acquire();
 
         return START_STICKY;
     }
@@ -175,18 +181,14 @@ public class SensorService extends Service implements SensorEventListener {
         mLocationLooper.quitSafely();
         mCallbackLooper.quitSafely();
         mMathThread.looper.quitSafely();
-        mMessageThread.looper.quitSafely();
+        mFileLooper.quitSafely();
 
         mLocationThread.interrupt();
-        mMessageThread.interrupt();
+        mFileThread.interrupt();
         mMathThread.interrupt();
         mCallbackThread.interrupt();
 
-        mPublisher.unregisterResources();
-        mPublisher.close();
-        mPublisher.disconnect();
-
-        Measurements.sSensorHasConnection = false;
+        mWakeLock.release();
 
         super.onDestroy();
     }
@@ -204,18 +206,20 @@ public class SensorService extends Service implements SensorEventListener {
         d.setData(first ? Measurements.DATA_1.subList(0, idx) :
                 Measurements.DATA_2.subList(0, idx));
 
-        mMessageThread.handleMessage(d, mPublisher, getApplicationContext());
-
-        // Give the connection a kick
-        if (mPublisher != null && !mPublisher.isConnected() && NetworkUtils.isNetworkConnected(getApplicationContext()))
-            Mqtt.connect(mPublisher, getString(R.string.mqtt_username), getString(R.string.mqtt_password));
+        mFileHandler.post(() -> {
+            try {
+                final byte[] msg = ZipUtils.compress(JsonConverter.convert(d));
+                FileUtils.write(d.getData().get(d.getData().size() - 1).getTime(), msg, getApplicationContext());
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     @Override
     @SuppressLint("SimpleDateFormat")
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            Measurements.sSensorHasConnection = mPublisher.isConnected();
             DateFormat isoDate = new SimpleDateFormat(FileUtils.ISO_DATE);
             isoDate.setTimeZone(TimeZone.getTimeZone("UTC"));
 
@@ -296,7 +300,7 @@ public class SensorService extends Service implements SensorEventListener {
                 final double gain3 = 0.999518942496229523;
                 final double gain4 = 0.998839971032117524;
 
-                if (sc.getCount() == 0) {
+                if (mCalculator.getCount() == 0) {
                     Measurements.Z_VAL[0] = zAcc;
                     Measurements.Z[0] = (b0 * Measurements.Z_VAL[0]) * gain1;
                     Measurements.X[0] = (b01 * Measurements.Z[0]) * gain2;
@@ -304,7 +308,7 @@ public class SensorService extends Service implements SensorEventListener {
                     Measurements.W[0] = (b03 * Measurements.Y[0]) * gain4;
 
                     fz = Measurements.W[0];
-                } else if (sc.getCount() == 1) {
+                } else if (mCalculator.getCount() == 1) {
                     Measurements.Z_VAL[1] = zAcc;
 
                     Measurements.Z[1] = (b0 * Measurements.Z_VAL[1] + b1 * Measurements.Z_VAL[0]
@@ -323,7 +327,7 @@ public class SensorService extends Service implements SensorEventListener {
                 } else {
 
 
-                    if (sc.getCount() > 2) {
+                    if (mCalculator.getCount() > 2) {
                         // Shift running stats to the left
                         Measurements.Z_VAL[0] = Measurements.Z_VAL[1];
                         Measurements.Z_VAL[1] = Measurements.Z_VAL[2];
@@ -368,11 +372,11 @@ public class SensorService extends Service implements SensorEventListener {
                     fz = Measurements.W[2];
                 }
 
-                sc.update(fz);
+                mCalculator.update(fz);
                 double speed = Math.pow(40, 2.0 / 3);
                 double I = 5.4;
                 double denominator = 0.7 * speed * I;
-                double std = sc.getStd();
+                double std = mCalculator.getStd();
                 double edr = std / (Math.pow(denominator, 0.5));
 
                 if (Measurements.sFirstArray) {

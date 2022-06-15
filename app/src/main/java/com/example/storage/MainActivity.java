@@ -57,31 +57,28 @@ public class MainActivity extends AppCompatActivity {
 
         Intent sensorIntent = new Intent(this, SensorService.class);
         boolean sensorsRunning = isServiceRunning(SensorService.class);
+        boolean backlogRunning = isServiceRunning(BacklogService.class);
 
         mBacklogIntent = new Intent(this, BacklogService.class);
         if (!sensorsRunning) {
-            if (FileUtils.list(getApplicationContext()).size() > 0) {
+            if (!backlogRunning && FileUtils.list(getApplicationContext()).size() > 0)
                 tryEnableBacklogs();
-            }
         } else {
             mBinding.server.setText(mSharedPreferences.getString("SERVER", String.valueOf(R.string.default_ip)));
             mBinding.session.setText(mSharedPreferences.getString("SESSION", ""));
             mBinding.switchBtn.setChecked(true);
             mBinding.switchBtn.setEnabled(true);
             disableEditText(mBinding.session);
-            disableEditText(mBinding.server);
         }
 
         mBinding.switchBtn.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 disableEditText(mBinding.session);
-                disableEditText(mBinding.server);
 
                 stopService(mBacklogIntent);
 
                 String server = String.valueOf(mBinding.server.getText()).replaceAll(" ", "");
                 sensorIntent.putExtra("SESSION", String.valueOf(mBinding.session.getText()));
-                sensorIntent.putExtra("SERVER", server);
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     startForegroundService(sensorIntent);
@@ -118,7 +115,6 @@ public class MainActivity extends AppCompatActivity {
                     tryEnableBacklogs();
 
                 enableEditText(mBinding.session);
-                enableEditText(mBinding.server);
             }
         });
 
@@ -131,8 +127,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                String server = String.valueOf(mBinding.server.getText()).replaceAll(" ", "");
-                mBinding.switchBtn.setEnabled(s.length() > 0 && mInetAddressValidator.isValid(server));
+                mBinding.switchBtn.setEnabled(s.length() > 0);
             }
 
             @Override
@@ -150,25 +145,20 @@ public class MainActivity extends AppCompatActivity {
 
                     if (mInetAddressValidator.isValid(server)) {
                         mBacklogIntent.putExtra("SERVER", server);
-                        startService(mBacklogIntent);
-
-                        mBinding.switchBtn.setEnabled(mBinding.session.getText().length() > 0);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            startForegroundService(mBacklogIntent);
+                        } else {
+                            startService(mBacklogIntent);
+                        }
+                    } else {
+                        stopService(mBacklogIntent);
                     }
-                } else {
-                    mBinding.switchBtn.setEnabled(false);
                 }
             }
 
             @Override
             public void afterTextChanged(Editable s) { /* Unused */ }
         });
-    }
-
-    @Override
-    protected void onStop() {
-        stopService(mBacklogIntent);
-
-        super.onStop();
     }
 
     @Override
@@ -186,7 +176,6 @@ public class MainActivity extends AppCompatActivity {
         mViewTimer = new Timer();
         scheduleUITimer();
     }
-
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -253,7 +242,7 @@ public class MainActivity extends AppCompatActivity {
                 runOnUiThread(() -> {
                     mBinding.backlogLabel.setText(MessageFormat.format("Backlog files: {0}", FileUtils.list(getApplicationContext()).size()));
                     mBinding.connectionLabel.
-                            setText((Measurements.sSensorHasConnection || Measurements.sBacklogHasConnection) ?
+                            setText((Measurements.sBacklogHasConnection) ?
                                     getString(R.string.connection_succeeded) :
                                     getString(R.string.connection_failed));
 
