@@ -14,6 +14,10 @@ public class Measurements {
     public static final Double[] X = new Double[3];
     public static final Double[] Y = new Double[3];
     public static final Double[] W = new Double[3];
+    public static final Double[] Z_GAIN = new Double[3];
+    public static final Double[] X_GAIN = new Double[3];
+    public static final Double[] Y_GAIN = new Double[3];
+    public static final Double[] W_GAIN = new Double[3];
     public static final ArrayList<Measurement> DATA_1 = new ArrayList<>(10000);
     public static final ArrayList<Measurement> DATA_2 = new ArrayList<>(10000);
     public static volatile boolean sBacklogHasConnection = false;

@@ -276,100 +276,126 @@ public class SensorService extends Service implements SensorEventListener {
                 double b2 = 1;
                 double a1 = -1.94921595802584;
                 double a2 = 0.953069895327891;
+                double gain1 = 0.000963484325512291;
 
                 double b01 = 1;
                 double b11 = 2;
                 double b21 = 1;
                 double a11 = -1.88660958262151;
                 double a21 = 0.890339736284024;
+                double gain2 = 0.000932538415629474;
 
                 double b02 = 1;
                 double b12 = -2;
                 double b22 = 1;
                 double a12 = -1.999037095803727126;
                 double a22 = 0.9990386741811910775;
+                double gain3 = 0.999518942496229523;
 
                 double b03 = 1;
                 double b13 = -2;
                 double b23 = 1;
                 double a13 = -1.99767915341159740;
                 double a23 = 0.997680730716872465;
-
-                final double gain1 = 0.000963484325512291;
-                final double gain2 = 0.000932538415629474;
-                final double gain3 = 0.999518942496229523;
-                final double gain4 = 0.998839971032117524;
+                double gain4 = 0.998839971032117524;
 
                 if (mCalculator.getCount() == 0) {
                     Measurements.Z_VAL[0] = zAcc;
-                    Measurements.Z[0] = (b0 * Measurements.Z_VAL[0]) * gain1;
-                    Measurements.X[0] = (b01 * Measurements.Z[0]) * gain2;
-                    Measurements.Y[0] = (b02 * Measurements.X[0]) * gain3;
-                    Measurements.W[0] = (b03 * Measurements.Y[0]) * gain4;
 
-                    fz = Measurements.W[0];
+                    Measurements.Z[0] = b0 * Measurements.Z_VAL[0];
+                    Measurements.Z_GAIN[0] = Measurements.Z[0] * gain1;
+
+                    Measurements.X[0] = b01 * Measurements.Z_GAIN[0];
+                    Measurements.X_GAIN[0] = Measurements.X[0] * gain2;
+
+                    Measurements.Y[0] = b02 * Measurements.X_GAIN[0];
+                    Measurements.Y_GAIN[0] = Measurements.Y[0] * gain3;
+
+                    Measurements.W[0] = b03 * Measurements.Y_GAIN[0];
+                    Measurements.W_GAIN[0] = Measurements.W[0] * gain4;
+
+                    fz = Measurements.W_GAIN[0];
                 } else if (mCalculator.getCount() == 1) {
                     Measurements.Z_VAL[1] = zAcc;
 
                     Measurements.Z[1] = (b0 * Measurements.Z_VAL[1] + b1 * Measurements.Z_VAL[0]
-                            - a1 * Measurements.Z[0]) * gain1;
+                            - a1 * Measurements.Z[0]);
 
-                    Measurements.X[1] = (b01 * Measurements.Z[1] + b11 * Measurements.Z[0]
-                            - a11 * Measurements.X[0]) * gain2;
+                    Measurements.Z_GAIN[1] = Measurements.Z[1] * gain1;
 
-                    Measurements.Y[1] = (b02 * Measurements.X[1] + b12 * Measurements.X[0]
-                            - a12 * Measurements.Y[0]) * gain3;
+                    Measurements.X[1] = (b01 * Measurements.Z_GAIN[1] + b11 * Measurements.Z_GAIN[0]
+                            - a11 * Measurements.X_GAIN[0]);
 
-                    Measurements.W[1] = (b03 * Measurements.Y[1] + b13 * Measurements.Y[0]
-                            - a13 * Measurements.W[0]) * gain4;
+                    Measurements.X_GAIN[1] = Measurements.X[1] * gain2;
 
-                    fz = Measurements.W[1];
+                    Measurements.Y[1] = (b02 * Measurements.X_GAIN[1] + b12 * Measurements.X_GAIN[0]
+                            - a12 * Measurements.Y_GAIN[0]);
+
+                    Measurements.Y_GAIN[1] = Measurements.Y[1] * gain3;
+
+                    Measurements.W[1] = (b03 * Measurements.Y_GAIN[1] + b13 * Measurements.Y_GAIN[0]
+                            - a13 * Measurements.W_GAIN[0]);
+
+                    Measurements.W_GAIN[1] = Measurements.W[1] * gain4;
+
+                    fz = Measurements.W_GAIN[1];
                 } else {
 
 
                     if (mCalculator.getCount() > 2) {
-                        // Shift running stats to the left
                         Measurements.Z_VAL[0] = Measurements.Z_VAL[1];
                         Measurements.Z_VAL[1] = Measurements.Z_VAL[2];
 
                         Measurements.Z[0] = Measurements.Z[1];
                         Measurements.Z[1] = Measurements.Z[2];
 
+                        Measurements.Z_GAIN[0] = Measurements.Z_GAIN[1];
+                        Measurements.Z_GAIN[1] = Measurements.Z_GAIN[2];
+
                         Measurements.X[0] = Measurements.X[1];
                         Measurements.X[1] = Measurements.X[2];
+
+                        Measurements.X_GAIN[0] = Measurements.X_GAIN[1];
+                        Measurements.X_GAIN[1] = Measurements.X_GAIN[2];
 
                         Measurements.Y[0] = Measurements.Y[1];
                         Measurements.Y[1] = Measurements.Y[2];
 
+                        Measurements.Y_GAIN[0] = Measurements.Y_GAIN[1];
+                        Measurements.Y_GAIN[1] = Measurements.Y_GAIN[2];
+
                         Measurements.W[0] = Measurements.W[1];
                         Measurements.W[1] = Measurements.W[2];
+
+                        Measurements.W_GAIN[0] = Measurements.W_GAIN[1];
+                        Measurements.W_GAIN[1] = Measurements.W_GAIN[2];
                     }
 
                     Measurements.Z_VAL[2] = zAcc;
 
-                    double zData = (b0 * Measurements.Z_VAL[2]
+                    Measurements.Z[2] = (b0 * Measurements.Z_VAL[2]
                             + b1 * Measurements.Z_VAL[1]
                             + b2 * Measurements.Z_VAL[0]
                             - (a1) * Measurements.Z[1] - (a2) * Measurements.Z[0]);
 
-                    Measurements.Z[2] = zData * gain1;
+                    Measurements.Z_GAIN[2] = Measurements.Z[2] * gain1;
 
-                    double xData = (b01 * Measurements.Z[2] + b11 * Measurements.Z[1]
-                            + b21 * Measurements.Z[0] - a11 * Measurements.X[1] - a21 * Measurements.X[0]);
+                    Measurements.X[2] = (b01 * Measurements.Z_GAIN[2] + b11 * Measurements.Z_GAIN[1]
+                            + b21 * Measurements.Z_GAIN[0] - a11 * Measurements.X[1] - a21 * Measurements.X[0]);
 
-                    Measurements.X[2] = xData * gain2;
+                    Measurements.X_GAIN[2] = Measurements.X[2] * gain2;
 
-                    double yData = (b02 * Measurements.X[2] + b12 * Measurements.X[1]
-                            + b22 * Measurements.X[0] - a12 * Measurements.Y[1] - a22 * Measurements.Y[0]);
+                    Measurements.Y[2] = (b02 * Measurements.X_GAIN[2] + b12 * Measurements.X_GAIN[1]
+                            + b22 * Measurements.X_GAIN[0] - a12 * Measurements.Y[1] - a22 * Measurements.Y[0]);
 
-                    Measurements.Y[2] = yData * gain3;
+                    Measurements.Y_GAIN[2] = Measurements.Y[2] * gain3;
 
-                    double wData = (b03 * Measurements.Y[2] + b13 * Measurements.Y[1]
-                            + b23 * Measurements.Y[0] - a13 * Measurements.W[1] - a23 * Measurements.W[0]);
+                    Measurements.W[2] = (b03 * Measurements.Y_GAIN[2] + b13 * Measurements.Y_GAIN[1]
+                            + b23 * Measurements.Y_GAIN[0] - a13 * Measurements.W[1] - a23 * Measurements.W[0]);
 
-                    Measurements.W[2] = wData * gain4;
+                    Measurements.W_GAIN[2] = Measurements.W[2] * gain4;
 
-                    fz = Measurements.W[2];
+                    fz = Measurements.W_GAIN[2];
                 }
 
                 mCalculator.update(fz);
