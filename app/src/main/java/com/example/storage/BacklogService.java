@@ -100,6 +100,7 @@ public class BacklogService extends Service {
         mPublisher.disconnect();
 
         Measurements.sBacklogHasConnection = false;
+        Measurements.sFinishedSend = true;
 
         mWakeLock.release();
 

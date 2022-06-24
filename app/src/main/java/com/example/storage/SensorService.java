@@ -104,11 +104,13 @@ public class SensorService extends Service implements SensorEventListener {
             @Override
             public void onLocationResult(@NonNull LocationResult locationResult) {
                 super.onLocationResult(locationResult);
+                Measurements.sAccuracy = locationResult.getLastLocation().getAccuracy();
                 Measurements.sLongitude = locationResult.getLastLocation().getLongitude();
                 Measurements.sLatitude = locationResult.getLastLocation().getLatitude();
                 Measurements.sAltitude = locationResult.getLastLocation().getAltitude();
-                Measurements.sSpeed = locationResult.getLastLocation().getSpeed();
-                Measurements.sAccuracy = locationResult.getLastLocation().getAccuracy();
+                Measurements.sSensorSpeed = locationResult.getLastLocation().getSpeed();
+                if (Measurements.sSensorSpeed > 0.0)
+                    Measurements.sSpeed = Measurements.sSensorSpeed;
             }
         };
 
@@ -398,8 +400,9 @@ public class SensorService extends Service implements SensorEventListener {
                     fz = Measurements.W_GAIN[2];
                 }
 
+                float s = Measurements.sSpeed;
                 mCalculator.update(fz);
-                double speed = Math.pow(40, 2.0 / 3);
+                double speed = Math.pow(s, 2.0 / 3);
                 double I = 5.4;
                 double denominator = 0.7 * speed * I;
                 double std = mCalculator.getStd();
@@ -428,12 +431,13 @@ public class SensorService extends Service implements SensorEventListener {
                     m.setZ(zAcc);
                     m.setFz(fz);
                     m.setStd(std);
-                    m.setEdr(edr);
+                    m.setEdr(edr == Double.POSITIVE_INFINITY ? 0.0 : edr);
                     m.setTime(time);
                     m.setLon(Measurements.sLongitude);
                     m.setLat(Measurements.sLatitude);
                     m.setAlt(Measurements.sAltitude);
-                    m.setMs(Measurements.sSpeed);
+                    m.setMs(s);
+                    m.setMs0(Measurements.sSensorSpeed);
                     m.setAcc(Measurements.sAccuracy);
 
                     int idx = Measurements.sCurrIdx;

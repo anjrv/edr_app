@@ -2,7 +2,7 @@
     <string name="app_name">Eddy</string>
     <string name="connection_failed">Connection: ✘</string>
     <string name="connection_succeeded">Connection: ✔</string>
-    <string name="stop_start">Stop/Start:</string>
+    <string name="stop_start">Measure:</string>
     <string name="mosquitto_url">Mosquitto:</string>
     <string name="default_ip">31.209.145.132</string>
     <string name="session">Session:</string>
@@ -17,4 +17,5 @@
     <string name="backlog_files_0">Backlog files: 0</string>
     <string name="std">STD:</string>
     <string name="edr">EDR: 0.000000</string>
+    <string name="send">Send:</string>
 </resources>

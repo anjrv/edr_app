@@ -21,12 +21,13 @@ public class Measurements {
     public static final ArrayList<Measurement> DATA_1 = new ArrayList<>(10000);
     public static final ArrayList<Measurement> DATA_2 = new ArrayList<>(10000);
     public static volatile boolean sBacklogHasConnection = false;
+    public static volatile boolean sFinishedSend = false;
     public static volatile double sLongitude = Double.NEGATIVE_INFINITY; // Canary to check write
     public static volatile double sLatitude = Double.MIN_VALUE;
     public static volatile double sAltitude = Double.MIN_VALUE;
-    public static volatile float sSpeed = Float.MIN_VALUE;
+    public static volatile float sSensorSpeed = 0.0f;
+    public static volatile float sSpeed = 0.0f;
     public static volatile float sAccuracy = Float.MIN_VALUE;
     public static volatile boolean sFirstArray = true;
     public static volatile int sCurrIdx = 0;
-
 }

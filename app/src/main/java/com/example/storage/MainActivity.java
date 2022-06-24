@@ -60,25 +60,36 @@ public class MainActivity extends AppCompatActivity {
         boolean backlogRunning = isServiceRunning(BacklogService.class);
 
         mBacklogIntent = new Intent(this, BacklogService.class);
-        if (!sensorsRunning) {
-            if (!backlogRunning && FileUtils.list(getApplicationContext()).size() > 0)
-                tryEnableBacklogs();
-        } else {
-            mBinding.server.setText(mSharedPreferences.getString("SERVER", String.valueOf(R.string.default_ip)));
+
+        if (sensorsRunning) {
             mBinding.session.setText(mSharedPreferences.getString("SESSION", ""));
             mBinding.switchBtn.setChecked(true);
             mBinding.switchBtn.setEnabled(true);
+            mBinding.sendBtn.setEnabled(false);
             disableEditText(mBinding.session);
+        }
+
+        if (backlogRunning) {
+            mBinding.server.setText(mSharedPreferences.getString("SERVER", String.valueOf(R.string.default_ip)));
+            mBinding.sendBtn.setChecked(true);
+            mBinding.sendBtn.setEnabled(true);
+            mBinding.switchBtn.setEnabled(false);
+            disableEditText(mBinding.server);
+        } else {
+            String server = String.valueOf(mBinding.server.getText()).replaceAll(" ", "");
+            mBinding.sendBtn.setEnabled(mInetAddressValidator.isValid(server));
         }
 
         mBinding.switchBtn.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
-                disableEditText(mBinding.session);
-
                 stopService(mBacklogIntent);
+                disableEditText(mBinding.session);
+                mBinding.sendBtn.setEnabled(false);
 
-                String server = String.valueOf(mBinding.server.getText()).replaceAll(" ", "");
                 sensorIntent.putExtra("SESSION", String.valueOf(mBinding.session.getText()));
+                mSharedPreferences.edit()
+                        .putString("SESSION", String.valueOf(mBinding.session.getText()))
+                        .apply();
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     startForegroundService(sensorIntent);
@@ -86,11 +97,6 @@ public class MainActivity extends AppCompatActivity {
                     getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                     startService(sensorIntent);
                 }
-
-                mSharedPreferences.edit()
-                        .putString("SESSION", String.valueOf(mBinding.session.getText()))
-                        .putString("SERVER", server)
-                        .apply();
             } else {
                 getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                 stopService(sensorIntent);
@@ -111,10 +117,36 @@ public class MainActivity extends AppCompatActivity {
                 Measurements.DATA_1.clear();
                 Measurements.DATA_2.clear();
 
-                if (FileUtils.list(this).size() > 0)
-                    tryEnableBacklogs();
-
                 enableEditText(mBinding.session);
+                mBinding.sendBtn.setEnabled(true);
+            }
+        });
+
+        mBinding.sendBtn.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                stopService(sensorIntent);
+                mBinding.switchBtn.setEnabled(false);
+                disableEditText(mBinding.server);
+
+                String server = String.valueOf(mBinding.server.getText()).replaceAll(" ", "");
+                mBacklogIntent.putExtra("SERVER", server);
+                mSharedPreferences.edit()
+                        .putString("SERVER", server)
+                        .apply();
+
+                Measurements.sFinishedSend = false;
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    startForegroundService(mBacklogIntent);
+                } else {
+                    getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                    startService(mBacklogIntent);
+                }
+            } else {
+                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                stopService(mBacklogIntent);
+                enableEditText(mBinding.server);
+                mBinding.switchBtn.setEnabled(true);
             }
         });
 
@@ -142,17 +174,7 @@ public class MainActivity extends AppCompatActivity {
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (s.length() >= 7) {
                     String server = String.valueOf(mBinding.server.getText()).replaceAll(" ", "");
-
-                    if (mInetAddressValidator.isValid(server)) {
-                        mBacklogIntent.putExtra("SERVER", server);
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            startForegroundService(mBacklogIntent);
-                        } else {
-                            startService(mBacklogIntent);
-                        }
-                    } else {
-                        stopService(mBacklogIntent);
-                    }
+                    mBinding.sendBtn.setEnabled(mInetAddressValidator.isValid(server));
                 }
             }
 
@@ -245,6 +267,9 @@ public class MainActivity extends AppCompatActivity {
                             setText((Measurements.sBacklogHasConnection) ?
                                     getString(R.string.connection_succeeded) :
                                     getString(R.string.connection_failed));
+
+                    if (Measurements.sFinishedSend)
+                        mBinding.sendBtn.setChecked(false);
 
                     if (mBinding.switchBtn.isChecked()) {
                         if (Measurements.sCurrIdx > 1) { // Current index to write to, read one back
