@@ -1,3 +1,5 @@
+workspace/
+.settings/
 *.iml
 .gradle
 /local.properties
