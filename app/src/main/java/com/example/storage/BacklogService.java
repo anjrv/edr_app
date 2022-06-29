@@ -37,6 +37,7 @@ public class BacklogService extends Service {
     private HandlerThread mBacklogThread;
     private Looper mBacklogLooper;
     private Handler mBacklogHandler;
+    private boolean mFirstCycle;
 
     @Override
     public void onCreate() {

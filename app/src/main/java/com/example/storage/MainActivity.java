@@ -1,6 +1,7 @@
 package com.example.storage;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
@@ -28,9 +29,13 @@ import com.example.storage.utils.ZipUtils;
 
 import org.apache.commons.validator.routines.InetAddressValidator;
 
+import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -77,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
             disableEditText(mBinding.server);
         } else {
             String server = String.valueOf(mBinding.server.getText()).replaceAll(" ", "");
-            mBinding.sendBtn.setEnabled(mInetAddressValidator.isValid(server));
+            mBinding.sendBtn.setEnabled(mInetAddressValidator.isValid(server) || server.contains("192.168.1."));
         }
 
         mBinding.switchBtn.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -86,9 +91,15 @@ public class MainActivity extends AppCompatActivity {
                 disableEditText(mBinding.session);
                 mBinding.sendBtn.setEnabled(false);
 
+                @SuppressLint("SimpleDateFormat") DateFormat isoDate = new SimpleDateFormat(FileUtils.ISO_DATE);
+                isoDate.setTimeZone(TimeZone.getTimeZone("UTC"));
+                String time = isoDate.format(new Date());
+
                 sensorIntent.putExtra("SESSION", String.valueOf(mBinding.session.getText()));
+                sensorIntent.putExtra("START", time);
                 mSharedPreferences.edit()
                         .putString("SESSION", String.valueOf(mBinding.session.getText()))
+                        .putString("START", time)
                         .apply();
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -106,7 +117,16 @@ public class MainActivity extends AppCompatActivity {
                             Measurements.DATA_2.subList(0, Measurements.sCurrIdx);
 
                     if (data.size() > 0) {
-                        final Dataframe d = new Dataframe(Build.BRAND, Build.MANUFACTURER, Build.MODEL, Build.ID, Build.VERSION.RELEASE, String.valueOf(mBinding.session.getText()), data);
+                        final Dataframe d = new Dataframe(
+                                Build.BRAND,
+                                Build.MANUFACTURER,
+                                Build.MODEL,
+                                Build.ID,
+                                Build.VERSION.RELEASE,
+                                mSharedPreferences.getString("SESSION", ""),
+                                mSharedPreferences.getString("START", ""),
+                                data
+                        );
                         final byte[] msg = ZipUtils.compress(JsonConverter.convert(d));
                         FileUtils.write(d.getData().get(d.getData().size() - 1).getTime(), msg, getApplicationContext());
                     }
@@ -174,7 +194,7 @@ public class MainActivity extends AppCompatActivity {
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (s.length() >= 7) {
                     String server = String.valueOf(mBinding.server.getText()).replaceAll(" ", "");
-                    mBinding.sendBtn.setEnabled(mInetAddressValidator.isValid(server));
+                    mBinding.sendBtn.setEnabled(mInetAddressValidator.isValid(server) || server.contains("192.168.1."));
                 }
             }
 
@@ -211,7 +231,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Check if the service is Running
+     * Check if the service is running
      *
      * @param serviceClass the class of the Service
      * @return true if the service is running otherwise false
@@ -224,18 +244,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         return false;
-    }
-
-    private void tryEnableBacklogs() {
-        String defaultTxt = String.valueOf(mBinding.server.getText()).replaceAll(" ", "");
-        if (defaultTxt.length() >= 7 && mInetAddressValidator.isValid(defaultTxt)) {
-            mBacklogIntent.putExtra("SERVER", defaultTxt);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                startForegroundService(mBacklogIntent);
-            } else {
-                startService(mBacklogIntent);
-            }
-        }
     }
 
     private void enableEditText(EditText editText) {

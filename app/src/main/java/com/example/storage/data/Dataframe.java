@@ -16,19 +16,21 @@ public class Dataframe implements Serializable {
     private String id;
     private String version;
     private String session;
+    private String start;
     private List<Measurement> data;
 
     public Dataframe() {
 
     }
 
-    public Dataframe(String brand, String manufacturer, String model, String id, String version, String session, List<Measurement> data) {
+    public Dataframe(String brand, String manufacturer, String model, String id, String version, String session, String time, List<Measurement> data) {
         this.brand = brand;
         this.manufacturer = manufacturer;
         this.model = model;
         this.id = id;
         this.version = version;
         this.session = session;
+        this.start = time;
         this.data = data;
     }
 
@@ -86,5 +88,13 @@ public class Dataframe implements Serializable {
 
     public void setData(List<Measurement> data) {
         this.data = data;
+    }
+
+    public String getStart() {
+        return this.start;
+    }
+
+    public void setStart(String time) {
+        this.start = time;
     }
 }

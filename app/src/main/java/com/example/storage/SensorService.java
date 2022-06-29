@@ -59,7 +59,6 @@ public class SensorService extends Service implements SensorEventListener {
     private LocationRequest mLocationRequest;
     private LocationCallback mLocationCallback;
     private MathThread mMathThread;
-    private String mSession;
 
     @Override
     public void onCreate() {
@@ -95,7 +94,7 @@ public class SensorService extends Service implements SensorEventListener {
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getApplicationContext());
 
         mLocationRequest = LocationRequest.create()
-                .setInterval(1000)
+                .setInterval(10000)
                 .setFastestInterval(1000)
                 .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY)
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
@@ -148,7 +147,7 @@ public class SensorService extends Service implements SensorEventListener {
         }
 
         // Preallocate all memory
-        for (int i = 0; i < 10000; i++) {
+        for (int i = 0; i < Measurements.MEASUREMENT_COUNT; i++) {
             Measurements.DATA_1.add(new Measurement());
             Measurements.DATA_2.add(new Measurement());
         }
@@ -157,7 +156,13 @@ public class SensorService extends Service implements SensorEventListener {
         Measurements.sCurrIdx = 0;
         Measurements.sFirstArray = true;
 
-        mSession = (String) intent.getExtras().get("SESSION");
+        d.setBrand(Build.BRAND);
+        d.setManufacturer(Build.MANUFACTURER);
+        d.setModel(Build.MODEL);
+        d.setId(Build.ID);
+        d.setVersion(Build.VERSION.RELEASE);
+        d.setSession((String) intent.getExtras().get("SESSION"));
+        d.setStart((String) intent.getExtras().get("START"));
 
         if (mFusedLocationProviderClient == null)
             mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getApplicationContext());
@@ -199,12 +204,7 @@ public class SensorService extends Service implements SensorEventListener {
      * Send the currently stored messages to the message thread handler
      */
     private void flushMessages(boolean first, int idx) {
-        d.setBrand(Build.BRAND);
-        d.setManufacturer(Build.MANUFACTURER);
-        d.setModel(Build.MODEL);
-        d.setId(Build.ID);
-        d.setVersion(Build.VERSION.RELEASE);
-        d.setSession(mSession);
+        // All other dataframe values should be set in onStartCommand, they never change
         d.setData(first ? Measurements.DATA_1.subList(0, idx) :
                 Measurements.DATA_2.subList(0, idx));
 
@@ -409,13 +409,13 @@ public class SensorService extends Service implements SensorEventListener {
                 double edr = std / (Math.pow(denominator, 0.5));
 
                 if (Measurements.sFirstArray) {
-                    if (Measurements.sCurrIdx >= 10000) {
+                    if (Measurements.sCurrIdx >= Measurements.MEASUREMENT_COUNT) {
                         flushMessages(true, Measurements.sCurrIdx);
                         Measurements.sFirstArray = false;
                         Measurements.sCurrIdx = 0;
                     }
                 } else {
-                    if (Measurements.sCurrIdx >= 10000) {
+                    if (Measurements.sCurrIdx >= Measurements.MEASUREMENT_COUNT) {
                         flushMessages(false, Measurements.sCurrIdx);
                         Measurements.sFirstArray = true;
                         Measurements.sCurrIdx = 0;
