@@ -401,12 +401,16 @@ public class SensorService extends Service implements SensorEventListener {
                 }
 
                 float s = Measurements.sSpeed;
+                double edr = 0.0;
                 mCalculator.update(fz);
-                double speed = Math.pow(s, 2.0 / 3);
-                double I = 5.4;
-                double denominator = 0.7 * speed * I;
                 double std = mCalculator.getStd();
-                double edr = std / (Math.pow(denominator, 0.5));
+
+                if (s > 0.0f) { // Motion required to calculate edr using speed divisor
+                    double speed = Math.pow(s, 2.0 / 3);
+                    double I = 5.4;
+                    double denominator = 0.7 * speed * I;
+                    edr = std / (Math.pow(denominator, 0.5));
+                }
 
                 if (Measurements.sFirstArray) {
                     if (Measurements.sCurrIdx >= Measurements.MEASUREMENT_COUNT) {
@@ -431,7 +435,7 @@ public class SensorService extends Service implements SensorEventListener {
                     m.setZ(zAcc);
                     m.setFz(fz);
                     m.setStd(std);
-                    m.setEdr(edr == Double.POSITIVE_INFINITY ? 0.0 : edr);
+                    m.setEdr(edr);
                     m.setTime(time);
                     m.setLon(Measurements.sLongitude);
                     m.setLat(Measurements.sLatitude);
