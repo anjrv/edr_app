@@ -159,9 +159,9 @@ public class SensorService extends Service implements SensorEventListener {
         d.setBrand(Build.BRAND);
         d.setManufacturer(Build.MANUFACTURER);
         d.setModel(Build.MODEL);
-        d.setId(Build.ID);
+        d.setId(Build.ID.replace("_", "")); // Ensure identifier fields do not contain split characters
+        d.setSession(((String) intent.getExtras().get("SESSION")).replace("_", ""));
         d.setVersion(Build.VERSION.RELEASE);
-        d.setSession((String) intent.getExtras().get("SESSION"));
         d.setStart((String) intent.getExtras().get("START"));
 
         if (mFusedLocationProviderClient == null)
