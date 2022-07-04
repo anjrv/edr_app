@@ -1,7 +1,6 @@
 workspace/
 .settings/
-**/build/*
-!**/build/outputs/apk/debug/*
+build/
 *.iml
 .gradle
 /local.properties
