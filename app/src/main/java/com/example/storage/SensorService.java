@@ -405,7 +405,8 @@ public class SensorService extends Service implements SensorEventListener {
                 mCalculator.update(fz);
                 double std = mCalculator.getStd();
 
-                if (s > 0.0f) { // Motion required to calculate edr using speed divisor
+                // Motion required as part of divisor for EDR, first std values of batch are inconsistent
+                if (mCalculator.getCount() > 100 && s > 0.0f) {
                     double speed = Math.pow(s, 2.0 / 3);
                     double I = 5.4;
                     double denominator = 0.7 * speed * I;
