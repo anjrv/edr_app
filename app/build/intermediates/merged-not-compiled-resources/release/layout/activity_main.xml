@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".MainActivity"
+    android:padding="16dp"
+    android:focusableInTouchMode="true"
+    android:clickable="true"
+    android:focusable="true">
+
+    <TextView
+        android:id="@+id/connection_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/connection_failed"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/backlog_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/backlog_files_0"
+        android:layout_marginTop="8dp"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/connection_label" />
+
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/switchBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:text="@string/stop_start"
+        android:enabled="false"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/sendBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:text="@string/send"
+        android:enabled="false"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintTop_toBottomOf="@id/switchBtn" />
+
+    <TextView
+        android:id="@+id/server_label"
+        android:layout_width="80dp"
+        android:layout_height="48dp"
+        android:gravity="center_vertical"
+        android:textStyle="bold"
+        android:text="@string/mosquitto_url"
+        android:layout_marginTop="80dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintTop_toBottomOf="@id/connection_label" />
+
+    <EditText
+        android:id="@+id/server"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:ems="10"
+        android:inputType="textLongMessage"
+        android:text="@string/default_ip"
+        android:layout_marginTop="80dp"
+        android:digits="0123456789."
+        app:layout_constraintStart_toEndOf="@id/server_label"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintTop_toBottomOf="@id/connection_label"
+        tools:ignore="LabelFor"
+        android:importantForAutofill="no" />
+
+    <TextView
+        android:id="@+id/session_label"
+        android:layout_width="80dp"
+        android:layout_height="48dp"
+        android:gravity="center_vertical"
+        android:textStyle="bold"
+        android:text="@string/session"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintTop_toBottomOf="@id/server_label" />
+
+    <EditText
+        android:id="@+id/session"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:ems="10"
+        android:inputType="textLongMessage"
+        android:layout_marginTop="16dp"
+        android:digits="0123456789 qwertzuiopasdfghjklyxcvbnm"
+        app:layout_constraintStart_toEndOf="@id/session_label"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintTop_toBottomOf="@id/server_label"
+        tools:ignore="LabelFor"
+        android:importantForAutofill="no" />
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@android:color/darker_gray"
+        android:layout_marginTop="32dp"
+        app:layout_constraintTop_toBottomOf="@id/session_label"/>
+
+    <TextView
+        android:id="@+id/time_label"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:text="@string/date_and_time"
+        android:layout_marginTop="32dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintTop_toBottomOf="@id/divider" />
+
+    <TextView
+        android:id="@+id/time"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        app:layout_constraintStart_toEndOf="@id/time_label"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintTop_toBottomOf="@id/divider" />
+
+    <TextView
+        android:id="@+id/label_lat"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:text="@string/latitude"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintTop_toBottomOf="@id/time_label" />
+
+    <TextView
+        android:id="@+id/tv_lat"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toEndOf="@id/label_lat"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintTop_toBottomOf="@id/time_label" />
+
+    <TextView
+        android:id="@+id/label_lon"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:text="@string/longitude"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintTop_toBottomOf="@id/label_lat" />
+
+    <TextView
+        android:id="@+id/tv_lon"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toEndOf="@id/label_lon"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintTop_toBottomOf="@id/label_lat" />
+
+    <TextView
+        android:id="@+id/label_alt"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:text="@string/altitude"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintTop_toBottomOf="@id/label_lon" />
+
+    <TextView
+        android:id="@+id/tv_altitude"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toEndOf="@id/label_alt"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintTop_toBottomOf="@id/label_lon" />
+
+    <TextView
+        android:id="@+id/label_speed"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:text="@string/speed"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintTop_toBottomOf="@id/label_alt" />
+
+    <TextView
+        android:id="@+id/tv_speed"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toEndOf="@id/label_speed"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintTop_toBottomOf="@id/label_alt" />
+
+    <TextView
+        android:id="@+id/label_accuracy"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:text="@string/gps_accuracy"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintTop_toBottomOf="@id/label_speed" />
+
+    <TextView
+        android:id="@+id/tv_accuracy"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toEndOf="@id/label_accuracy"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintTop_toBottomOf="@id/label_speed" />
+
+    <TextView
+        android:id="@+id/label_zAcc"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:text="@string/z_acceleration"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintTop_toBottomOf="@id/label_accuracy" />
+
+    <TextView
+        android:id="@+id/zValue"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toEndOf="@id/label_zAcc"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintTop_toBottomOf="@id/label_accuracy" />
+
+    <TextView
+        android:id="@+id/label_zFiltered"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:text="@string/z_filtered"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintTop_toBottomOf="@id/label_zAcc" />
+
+    <TextView
+        android:id="@+id/zFiltered"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toEndOf="@id/label_zFiltered"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintTop_toBottomOf="@id/label_zAcc" />
+
+    <TextView
+        android:id="@+id/label_std"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:text="@string/std"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintTop_toBottomOf="@id/label_zFiltered" />
+
+    <TextView
+        android:id="@+id/std"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toEndOf="@id/label_std"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintTop_toBottomOf="@id/label_zFiltered" />
+
+    <TextView
+        android:id="@+id/edr"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textSize="36sp"
+        android:text="@string/edr"
+        android:gravity="center"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintTop_toBottomOf="@id/label_std"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,195 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="is.edr.measurements"
+4    android:versionCode="1"
+5    android:versionName="1.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="21"
+8-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml
+9        android:targetSdkVersion="32" />
+9-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml
+10
+11    <uses-permission android:name="android.permission.WAKE_LOCK" />
+11-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:6:5-68
+11-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:6:22-65
+12    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+12-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:7:5-79
+12-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:7:22-76
+13    <uses-permission android:name="android.permission.INTERNET" />
+13-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:8:5-67
+13-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:8:22-64
+14    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+14-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:9:5-75
+14-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:9:22-72
+15    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+15-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:10:5-84
+15-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:10:22-82
+16    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+16-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:11:5-81
+16-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:11:22-78
+17    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+17-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:12:5-79
+17-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:12:22-76
+18    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+18-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:13:5-76
+18-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:13:22-74
+19    <uses-permission android:name="android.permission.HIGH_SAMPLING_RATE_SENSORS" />
+19-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:14:5-15:43
+19-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:14:22-82
+20
+21    <uses-feature
+21-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:17:5-18:35
+22        android:name="android.hardware.sensor.accelerometer"
+22-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:17:19-71
+23        android:required="true" />
+23-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:18:9-32
+24
+25    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+25-->[com.github.hannesa2:paho.mqtt.android:3.3.5] /home/anjrv/.gradle/caches/transforms-3/a4127db5562cf9e258b40606d21315b0/transformed/jetified-paho.mqtt.android-3.3.5/AndroidManifest.xml:11:5-79
+25-->[com.github.hannesa2:paho.mqtt.android:3.3.5] /home/anjrv/.gradle/caches/transforms-3/a4127db5562cf9e258b40606d21315b0/transformed/jetified-paho.mqtt.android-3.3.5/AndroidManifest.xml:11:22-76
+26
+27    <application
+27-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:20:5-41:19
+28        android:allowBackup="true"
+28-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:21:9-35
+29        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+29-->[androidx.core:core:1.7.0] /home/anjrv/.gradle/caches/transforms-3/0c734a8f9451ded3159b05d46fc9a23a/transformed/core-1.7.0/AndroidManifest.xml:24:18-86
+30        android:icon="@drawable/ic_launcher_new_foreground"
+30-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:22:9-60
+31        android:label="@string/app_name"
+31-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:23:9-41
+32        android:roundIcon="@drawable/ic_launcher_new_round"
+32-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:24:9-60
+33        android:supportsRtl="true"
+33-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:25:9-35
+34        android:theme="@style/Theme.Storage" >
+34-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:26:9-45
+35        <activity
+35-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:27:9-36:20
+36            android:name="com.example.storage.MainActivity"
+36-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:27:19-47
+37            android:exported="true"
+37-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:28:13-36
+38            android:screenOrientation="portrait" >
+38-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:29:13-49
+39            <intent-filter>
+39-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:31:13-35:29
+40                <action android:name="android.intent.action.MAIN" />
+40-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:32:17-69
+40-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:32:25-66
+41
+42                <category android:name="android.intent.category.LAUNCHER" />
+42-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:34:17-77
+42-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:34:27-74
+43            </intent-filter>
+44        </activity>
+45
+46        <service
+46-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:38:9-90
+47            android:name="com.example.storage.SensorService"
+47-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:38:18-47
+48            android:foregroundServiceType="location" />
+48-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:38:48-88
+49        <service
+49-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:39:9-98
+50            android:name="com.example.storage.BacklogService"
+50-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:39:18-48
+51            android:foregroundServiceType="connectedDevice" />
+51-->/home/anjrv/Projects/hvassahraun/edr_app/app/src/main/AndroidManifest.xml:39:49-96
+52        <service android:name="info.mqtt.android.service.MqttService" />
+52-->[com.github.hannesa2:paho.mqtt.android:3.3.5] /home/anjrv/.gradle/caches/transforms-3/a4127db5562cf9e258b40606d21315b0/transformed/jetified-paho.mqtt.android-3.3.5/AndroidManifest.xml:15:9-73
+52-->[com.github.hannesa2:paho.mqtt.android:3.3.5] /home/anjrv/.gradle/caches/transforms-3/a4127db5562cf9e258b40606d21315b0/transformed/jetified-paho.mqtt.android-3.3.5/AndroidManifest.xml:15:18-70
+53
+54        <activity
+54-->[com.github.AppDevNext.Logcat:LogcatCoreLib:2.9.5] /home/anjrv/.gradle/caches/transforms-3/7db03e5fc1f076756510db71eb422ea5/transformed/jetified-LogcatCoreLib-2.9.5/AndroidManifest.xml:8:9-11:50
+55            android:name="info.hannes.logcat.LogcatActivity"
+55-->[com.github.AppDevNext.Logcat:LogcatCoreLib:2.9.5] /home/anjrv/.gradle/caches/transforms-3/7db03e5fc1f076756510db71eb422ea5/transformed/jetified-LogcatCoreLib-2.9.5/AndroidManifest.xml:9:13-61
+56            android:label="Logcat"
+56-->[com.github.AppDevNext.Logcat:LogcatCoreLib:2.9.5] /home/anjrv/.gradle/caches/transforms-3/7db03e5fc1f076756510db71eb422ea5/transformed/jetified-LogcatCoreLib-2.9.5/AndroidManifest.xml:10:13-35
+57            android:theme="@style/DetailTheme" />
+57-->[com.github.AppDevNext.Logcat:LogcatCoreLib:2.9.5] /home/anjrv/.gradle/caches/transforms-3/7db03e5fc1f076756510db71eb422ea5/transformed/jetified-LogcatCoreLib-2.9.5/AndroidManifest.xml:11:13-47
+58        <activity
+58-->[com.github.AppDevNext.Logcat:LogcatCoreLib:2.9.5] /home/anjrv/.gradle/caches/transforms-3/7db03e5fc1f076756510db71eb422ea5/transformed/jetified-LogcatCoreLib-2.9.5/AndroidManifest.xml:12:9-15:50
+59            android:name="info.hannes.logcat.LogfileActivity"
+59-->[com.github.AppDevNext.Logcat:LogcatCoreLib:2.9.5] /home/anjrv/.gradle/caches/transforms-3/7db03e5fc1f076756510db71eb422ea5/transformed/jetified-LogcatCoreLib-2.9.5/AndroidManifest.xml:13:13-62
+60            android:label="Timber"
+60-->[com.github.AppDevNext.Logcat:LogcatCoreLib:2.9.5] /home/anjrv/.gradle/caches/transforms-3/7db03e5fc1f076756510db71eb422ea5/transformed/jetified-LogcatCoreLib-2.9.5/AndroidManifest.xml:14:13-35
+61            android:theme="@style/DetailTheme" />
+61-->[com.github.AppDevNext.Logcat:LogcatCoreLib:2.9.5] /home/anjrv/.gradle/caches/transforms-3/7db03e5fc1f076756510db71eb422ea5/transformed/jetified-LogcatCoreLib-2.9.5/AndroidManifest.xml:15:13-47
+62        <activity
+62-->[com.github.AppDevNext.Logcat:LogcatCoreLib:2.9.5] /home/anjrv/.gradle/caches/transforms-3/7db03e5fc1f076756510db71eb422ea5/transformed/jetified-LogcatCoreLib-2.9.5/AndroidManifest.xml:16:9-19:50
+63            android:name="info.hannes.logcat.BothLogActivity"
+63-->[com.github.AppDevNext.Logcat:LogcatCoreLib:2.9.5] /home/anjrv/.gradle/caches/transforms-3/7db03e5fc1f076756510db71eb422ea5/transformed/jetified-LogcatCoreLib-2.9.5/AndroidManifest.xml:17:13-62
+64            android:label="All log"
+64-->[com.github.AppDevNext.Logcat:LogcatCoreLib:2.9.5] /home/anjrv/.gradle/caches/transforms-3/7db03e5fc1f076756510db71eb422ea5/transformed/jetified-LogcatCoreLib-2.9.5/AndroidManifest.xml:18:13-36
+65            android:theme="@style/DetailTheme" />
+65-->[com.github.AppDevNext.Logcat:LogcatCoreLib:2.9.5] /home/anjrv/.gradle/caches/transforms-3/7db03e5fc1f076756510db71eb422ea5/transformed/jetified-LogcatCoreLib-2.9.5/AndroidManifest.xml:19:13-47
+66
+67        <provider
+67-->[com.github.AppDevNext.Logcat:LogcatCoreLib:2.9.5] /home/anjrv/.gradle/caches/transforms-3/7db03e5fc1f076756510db71eb422ea5/transformed/jetified-LogcatCoreLib-2.9.5/AndroidManifest.xml:21:9-29:20
+68            android:name="androidx.core.content.FileProvider"
+68-->[com.github.AppDevNext.Logcat:LogcatCoreLib:2.9.5] /home/anjrv/.gradle/caches/transforms-3/7db03e5fc1f076756510db71eb422ea5/transformed/jetified-LogcatCoreLib-2.9.5/AndroidManifest.xml:22:13-62
+69            android:authorities="is.edr.measurements.provider"
+69-->[com.github.AppDevNext.Logcat:LogcatCoreLib:2.9.5] /home/anjrv/.gradle/caches/transforms-3/7db03e5fc1f076756510db71eb422ea5/transformed/jetified-LogcatCoreLib-2.9.5/AndroidManifest.xml:23:13-60
+70            android:exported="false"
+70-->[com.github.AppDevNext.Logcat:LogcatCoreLib:2.9.5] /home/anjrv/.gradle/caches/transforms-3/7db03e5fc1f076756510db71eb422ea5/transformed/jetified-LogcatCoreLib-2.9.5/AndroidManifest.xml:24:13-37
+71            android:grantUriPermissions="true" >
+71-->[com.github.AppDevNext.Logcat:LogcatCoreLib:2.9.5] /home/anjrv/.gradle/caches/transforms-3/7db03e5fc1f076756510db71eb422ea5/transformed/jetified-LogcatCoreLib-2.9.5/AndroidManifest.xml:25:13-47
+72            <meta-data
+72-->[com.github.AppDevNext.Logcat:LogcatCoreLib:2.9.5] /home/anjrv/.gradle/caches/transforms-3/7db03e5fc1f076756510db71eb422ea5/transformed/jetified-LogcatCoreLib-2.9.5/AndroidManifest.xml:26:13-28:58
+73                android:name="android.support.FILE_PROVIDER_PATHS"
+73-->[com.github.AppDevNext.Logcat:LogcatCoreLib:2.9.5] /home/anjrv/.gradle/caches/transforms-3/7db03e5fc1f076756510db71eb422ea5/transformed/jetified-LogcatCoreLib-2.9.5/AndroidManifest.xml:27:17-67
+74                android:resource="@xml/provider_paths" />
+74-->[com.github.AppDevNext.Logcat:LogcatCoreLib:2.9.5] /home/anjrv/.gradle/caches/transforms-3/7db03e5fc1f076756510db71eb422ea5/transformed/jetified-LogcatCoreLib-2.9.5/AndroidManifest.xml:28:17-55
+75        </provider>
+76
+77        <service
+77-->[androidx.room:room-runtime:2.4.2] /home/anjrv/.gradle/caches/transforms-3/4a3b5f33337ded1b81c553095eeef74a/transformed/room-runtime-2.4.2/AndroidManifest.xml:25:9-28:40
+78            android:name="androidx.room.MultiInstanceInvalidationService"
+78-->[androidx.room:room-runtime:2.4.2] /home/anjrv/.gradle/caches/transforms-3/4a3b5f33337ded1b81c553095eeef74a/transformed/room-runtime-2.4.2/AndroidManifest.xml:26:13-74
+79            android:directBootAware="true"
+79-->[androidx.room:room-runtime:2.4.2] /home/anjrv/.gradle/caches/transforms-3/4a3b5f33337ded1b81c553095eeef74a/transformed/room-runtime-2.4.2/AndroidManifest.xml:27:13-43
+80            android:exported="false" />
+80-->[androidx.room:room-runtime:2.4.2] /home/anjrv/.gradle/caches/transforms-3/4a3b5f33337ded1b81c553095eeef74a/transformed/room-runtime-2.4.2/AndroidManifest.xml:28:13-37
+81
+82        <activity
+82-->[com.google.android.gms:play-services-base:18.0.1] /home/anjrv/.gradle/caches/transforms-3/8c3500a7dc83974c0d6f9856057323b5/transformed/jetified-play-services-base-18.0.1/AndroidManifest.xml:20:9-22:45
+83            android:name="com.google.android.gms.common.api.GoogleApiActivity"
+83-->[com.google.android.gms:play-services-base:18.0.1] /home/anjrv/.gradle/caches/transforms-3/8c3500a7dc83974c0d6f9856057323b5/transformed/jetified-play-services-base-18.0.1/AndroidManifest.xml:20:19-85
+84            android:exported="false"
+84-->[com.google.android.gms:play-services-base:18.0.1] /home/anjrv/.gradle/caches/transforms-3/8c3500a7dc83974c0d6f9856057323b5/transformed/jetified-play-services-base-18.0.1/AndroidManifest.xml:22:19-43
+85            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+85-->[com.google.android.gms:play-services-base:18.0.1] /home/anjrv/.gradle/caches/transforms-3/8c3500a7dc83974c0d6f9856057323b5/transformed/jetified-play-services-base-18.0.1/AndroidManifest.xml:21:19-78
+86
+87        <meta-data
+87-->[com.google.android.gms:play-services-basement:18.0.0] /home/anjrv/.gradle/caches/transforms-3/7226b3b14e0e7b246d5aa530eb522a4d/transformed/jetified-play-services-basement-18.0.0/AndroidManifest.xml:21:9-23:69
+88            android:name="com.google.android.gms.version"
+88-->[com.google.android.gms:play-services-basement:18.0.0] /home/anjrv/.gradle/caches/transforms-3/7226b3b14e0e7b246d5aa530eb522a4d/transformed/jetified-play-services-basement-18.0.0/AndroidManifest.xml:22:13-58
+89            android:value="@integer/google_play_services_version" />
+89-->[com.google.android.gms:play-services-basement:18.0.0] /home/anjrv/.gradle/caches/transforms-3/7226b3b14e0e7b246d5aa530eb522a4d/transformed/jetified-play-services-basement-18.0.0/AndroidManifest.xml:23:13-66
+90
+91        <provider
+91-->[androidx.emoji2:emoji2:1.0.0] /home/anjrv/.gradle/caches/transforms-3/73850b32b2c7ce32b12b91c16b2382c2/transformed/jetified-emoji2-1.0.0/AndroidManifest.xml:26:9-34:20
+92            android:name="androidx.startup.InitializationProvider"
+92-->[androidx.emoji2:emoji2:1.0.0] /home/anjrv/.gradle/caches/transforms-3/73850b32b2c7ce32b12b91c16b2382c2/transformed/jetified-emoji2-1.0.0/AndroidManifest.xml:27:13-67
+93            android:authorities="is.edr.measurements.androidx-startup"
+93-->[androidx.emoji2:emoji2:1.0.0] /home/anjrv/.gradle/caches/transforms-3/73850b32b2c7ce32b12b91c16b2382c2/transformed/jetified-emoji2-1.0.0/AndroidManifest.xml:28:13-68
+94            android:exported="false" >
+94-->[androidx.emoji2:emoji2:1.0.0] /home/anjrv/.gradle/caches/transforms-3/73850b32b2c7ce32b12b91c16b2382c2/transformed/jetified-emoji2-1.0.0/AndroidManifest.xml:29:13-37
+95            <meta-data
+95-->[androidx.emoji2:emoji2:1.0.0] /home/anjrv/.gradle/caches/transforms-3/73850b32b2c7ce32b12b91c16b2382c2/transformed/jetified-emoji2-1.0.0/AndroidManifest.xml:31:13-33:52
+96                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+96-->[androidx.emoji2:emoji2:1.0.0] /home/anjrv/.gradle/caches/transforms-3/73850b32b2c7ce32b12b91c16b2382c2/transformed/jetified-emoji2-1.0.0/AndroidManifest.xml:32:17-75
+97                android:value="androidx.startup" />
+97-->[androidx.emoji2:emoji2:1.0.0] /home/anjrv/.gradle/caches/transforms-3/73850b32b2c7ce32b12b91c16b2382c2/transformed/jetified-emoji2-1.0.0/AndroidManifest.xml:33:17-49
+98            <meta-data
+98-->[androidx.lifecycle:lifecycle-process:2.4.0] /home/anjrv/.gradle/caches/transforms-3/280b8c662ae12c28e2c58a98b88e76a9/transformed/jetified-lifecycle-process-2.4.0/AndroidManifest.xml:31:13-33:52
+99                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+99-->[androidx.lifecycle:lifecycle-process:2.4.0] /home/anjrv/.gradle/caches/transforms-3/280b8c662ae12c28e2c58a98b88e76a9/transformed/jetified-lifecycle-process-2.4.0/AndroidManifest.xml:32:17-78
+100                android:value="androidx.startup" />
+100-->[androidx.lifecycle:lifecycle-process:2.4.0] /home/anjrv/.gradle/caches/transforms-3/280b8c662ae12c28e2c58a98b88e76a9/transformed/jetified-lifecycle-process-2.4.0/AndroidManifest.xml:33:17-49
+101        </provider>
+102    </application>
+103
+104</manifest>
