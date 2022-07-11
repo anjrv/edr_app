@@ -18,6 +18,8 @@ public class Measurement implements Cloneable {
     private double fz;
     private double std;
     private double edr;
+    private double rms;
+    private double edr_rms;
 
     public Measurement() {
     }
@@ -78,6 +80,22 @@ public class Measurement implements Cloneable {
 
     public void setEdr(double edr) {
         this.edr = edr;
+    }
+
+    public double getRms() {
+        return rms;
+    }
+
+    public void setRms(double rms) {
+        this.rms = rms;
+    }
+
+    public double getEdrRms() {
+        return edr_rms;
+    }
+
+    public void setEdrRms(double edr_rms) {
+        this.edr_rms = edr_rms;
     }
 
     public String getTime() {

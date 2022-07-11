@@ -12,6 +12,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.Location;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -94,22 +95,25 @@ public class SensorService extends Service implements SensorEventListener {
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getApplicationContext());
 
         mLocationRequest = LocationRequest.create()
-                .setInterval(10000)
+                .setInterval(5000)
                 .setFastestInterval(1000)
-                .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY)
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         mLocationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(@NonNull LocationResult locationResult) {
                 super.onLocationResult(locationResult);
-                Measurements.sAccuracy = locationResult.getLastLocation().getAccuracy();
-                Measurements.sLongitude = locationResult.getLastLocation().getLongitude();
-                Measurements.sLatitude = locationResult.getLastLocation().getLatitude();
-                Measurements.sAltitude = locationResult.getLastLocation().getAltitude();
-                Measurements.sSensorSpeed = locationResult.getLastLocation().getSpeed();
-                if (Measurements.sSensorSpeed > 0.0)
-                    Measurements.sSpeed = Measurements.sSensorSpeed;
+
+                Location l = locationResult.getLastLocation();
+
+                // Check accuracy and quality of l alternatively hold an average
+
+                Measurements.sAccuracy = l.getAccuracy();
+                Measurements.sLongitude = l.getLongitude();
+                Measurements.sLatitude = l.getLatitude();
+                Measurements.sAltitude = l.getAltitude();
+                Measurements.sSensorSpeed = l.getSpeed();
+                Measurements.sSpeed = Measurements.sSensorSpeed;
             }
         };
 
@@ -133,7 +137,7 @@ public class SensorService extends Service implements SensorEventListener {
                     .setContentIntent(pendingIntent)
                     .setAutoCancel(false)
                     .setContentTitle("Eddy")
-                    .setContentText("Measurements ongoing...");
+                    .setContentText("Measuring");
 
             Notification notification = builder.build();
 
@@ -152,7 +156,7 @@ public class SensorService extends Service implements SensorEventListener {
             Measurements.DATA_2.add(new Measurement());
         }
 
-        mCalculator = new SlidingCalculator();
+        mCalculator = new SlidingCalculator(2500);
         Measurements.sCurrIdx = 0;
         Measurements.sFirstArray = true;
 
@@ -402,15 +406,18 @@ public class SensorService extends Service implements SensorEventListener {
 
                 float s = Measurements.sSpeed;
                 double edr = 0.0;
+                double edr_rms = 0.0;
                 mCalculator.update(fz);
                 double std = mCalculator.getStd();
+                double rms = mCalculator.getRms();
 
-                // Motion required as part of divisor for EDR, first std values of batch are inconsistent
+                // For speed 0 or the initial batch of measurements we skip trying to estimate edr
                 if (mCalculator.getCount() > 100 && s > 0.0f) {
                     double speed = Math.pow(s, 2.0 / 3);
                     double I = 5.4;
                     double denominator = 0.7 * speed * I;
                     edr = std / (Math.pow(denominator, 0.5));
+                    edr_rms = rms / (Math.pow(denominator, 0.5));
                 }
 
                 if (Measurements.sFirstArray) {
@@ -437,6 +444,8 @@ public class SensorService extends Service implements SensorEventListener {
                     m.setFz(fz);
                     m.setStd(std);
                     m.setEdr(edr);
+                    m.setRms(rms);
+                    m.setEdrRms(edr_rms);
                     m.setTime(time);
                     m.setLon(Measurements.sLongitude);
                     m.setLat(Measurements.sLatitude);
