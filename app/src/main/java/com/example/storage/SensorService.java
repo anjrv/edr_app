@@ -60,6 +60,27 @@ public class SensorService extends Service implements SensorEventListener {
     private LocationRequest mLocationRequest;
     private LocationCallback mLocationCallback;
     private MathThread mMathThread;
+    private Location mPrevLoc;
+
+    private void setAvgSpeed(Location x, Location y) {
+        double lon1 = Math.toRadians(x.getLongitude());
+        double lon2 = Math.toRadians(y.getLongitude());
+        double lat1 = Math.toRadians(x.getLatitude());
+        double lat2 = Math.toRadians(y.getLatitude());
+
+        double dLon = lon2 - lon1;
+        double dLat = lat2 - lat1;
+        double a = Math.pow(Math.sin(dLat / 2), 2)
+                + Math.cos(lat1) * Math.cos(lat2)
+                * Math.pow(Math.sin(dLon / 2),2);
+
+        double c = 2 * Math.asin(Math.sqrt(a));
+        double r = 6371;
+        double dist = c * r * 1000;
+        double tDelta = (y.getTime() - x.getTime()) / 1000.0;
+
+        Measurements.sSpeed = (float) (dist/tDelta);
+    }
 
     @Override
     public void onCreate() {
@@ -96,7 +117,7 @@ public class SensorService extends Service implements SensorEventListener {
 
         mLocationRequest = LocationRequest.create()
                 .setInterval(5000)
-                .setFastestInterval(1000)
+                .setFastestInterval(500)
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         mLocationCallback = new LocationCallback() {
@@ -106,14 +127,18 @@ public class SensorService extends Service implements SensorEventListener {
 
                 Location l = locationResult.getLastLocation();
 
-                // Check accuracy and quality of l alternatively hold an average
-
                 Measurements.sAccuracy = l.getAccuracy();
                 Measurements.sLongitude = l.getLongitude();
                 Measurements.sLatitude = l.getLatitude();
                 Measurements.sAltitude = l.getAltitude();
                 Measurements.sSensorSpeed = l.getSpeed();
-                Measurements.sSpeed = Measurements.sSensorSpeed;
+
+                if (mPrevLoc != null && l.getAccuracy() < 200) {
+                    setAvgSpeed(mPrevLoc, l);
+                    mPrevLoc = l;
+                } else if (mPrevLoc == null) { // Grab any location measurement as starting point
+                    mPrevLoc = l;
+                }
             }
         };
 
@@ -156,6 +181,7 @@ public class SensorService extends Service implements SensorEventListener {
             Measurements.DATA_2.add(new Measurement());
         }
 
+        mPrevLoc = null;
         mCalculator = new SlidingCalculator(2500);
         Measurements.sCurrIdx = 0;
         Measurements.sFirstArray = true;

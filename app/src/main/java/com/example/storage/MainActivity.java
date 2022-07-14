@@ -306,7 +306,7 @@ public class MainActivity extends AppCompatActivity {
         mBinding.time.setText(m.getTime().replace('T', ' ').replace('Z', ' '));
         mBinding.zValue.setText((String.valueOf(m.getZ())));
         mBinding.zFiltered.setText(String.valueOf(Math.max(m.getFz(), 0.0)));
-        mBinding.std.setText(String.valueOf(m.getStd()));
-        mBinding.edr.setText(String.format(Locale.US, "%s %.6f", "EDR:", m.getEdr()));
+        mBinding.std.setText(String.valueOf(m.getRms()));
+        mBinding.edr.setText(String.format(Locale.US, "%s %.6f", "EDR:", m.getEdrRms()));
     }
 }
