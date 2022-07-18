@@ -117,7 +117,7 @@ public class SensorService extends Service implements SensorEventListener {
 
         mLocationRequest = LocationRequest.create()
                 .setInterval(5000)
-                .setFastestInterval(500)
+                .setFastestInterval(5000)
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         mLocationCallback = new LocationCallback() {
