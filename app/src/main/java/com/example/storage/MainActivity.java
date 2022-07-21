@@ -60,11 +60,11 @@ public class MainActivity extends AppCompatActivity {
 
         mSharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
 
-        Intent sensorIntent = new Intent(this, SensorService.class);
+        Intent sensorIntent = new Intent(getApplicationContext(), SensorService.class);
         boolean sensorsRunning = isServiceRunning(SensorService.class);
         boolean backlogRunning = isServiceRunning(BacklogService.class);
 
-        mBacklogIntent = new Intent(this, BacklogService.class);
+        mBacklogIntent = new Intent(getApplicationContext(), BacklogService.class);
 
         if (sensorsRunning) {
             mBinding.session.setText(mSharedPreferences.getString("SESSION", ""));
