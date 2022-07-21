@@ -77,7 +77,7 @@ public class BacklogService extends Service {
             startForeground(2, notification);
         }
 
-        mPublisher = Mqtt.generateClient(this, CLIENT_ID, (String) intent.getExtras().get("SERVER"));
+        mPublisher = Mqtt.generateClient(getApplicationContext(), CLIENT_ID, (String) intent.getExtras().get("SERVER"));
         Mqtt.connect(mPublisher, getString(R.string.mqtt_username), getString(R.string.mqtt_password));
 
         scheduleBacklogs();
