@@ -7,8 +7,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.PowerManager;
+import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.WindowManager;
@@ -47,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding mBinding;
     private Timer mViewTimer;
 
+    @SuppressLint("BatteryLife")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,6 +63,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         mSharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        String packageName = this.getPackageName();
 
         Intent sensorIntent = new Intent(getApplicationContext(), SensorService.class);
         boolean sensorsRunning = isServiceRunning(SensorService.class);
@@ -101,6 +107,16 @@ public class MainActivity extends AppCompatActivity {
                         .putString("SESSION", String.valueOf(mBinding.session.getText()))
                         .putString("START", time)
                         .apply();
+
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    if (powerManager.isIgnoringBatteryOptimizations(this.getPackageName())) {
+                        sensorIntent.setAction(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
+                    } else {
+                        sensorIntent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+                        sensorIntent.setData(Uri.parse("package:" + packageName));
+                    }
+                }
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     startForegroundService(sensorIntent);
@@ -155,6 +171,15 @@ public class MainActivity extends AppCompatActivity {
                         .apply();
 
                 Measurements.sFinishedSend = false;
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    if (powerManager.isIgnoringBatteryOptimizations(this.getPackageName())) {
+                        mBacklogIntent.setAction(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
+                    } else {
+                        mBacklogIntent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+                        mBacklogIntent.setData(Uri.parse("package:" + packageName));
+                    }
+                }
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     startForegroundService(mBacklogIntent);
