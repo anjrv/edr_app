@@ -40,7 +40,7 @@ public class Mqtt {
         opts.setUserName(username);
         opts.setPassword(password.toCharArray());
         opts.setCleanSession(true);
-        opts.setKeepAliveInterval(0);
+        // opts.setKeepAliveInterval(0);
         opts.setConnectionTimeout(TIMEOUT);
         opts.setAutomaticReconnect(true);
 
@@ -67,7 +67,7 @@ public class Mqtt {
     public static IMqttDeliveryToken publish(MqttAndroidClient client, String topic, byte[] msg) {
         MqttMessage message = new MqttMessage();
         message.setPayload(msg);
-        message.setQos(0);
+        message.setQos(1);
 
         return client.publish(topic, message);
     }
