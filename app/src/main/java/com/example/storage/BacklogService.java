@@ -134,7 +134,7 @@ public class BacklogService extends Service {
                     } else if (mPublisher != null && !mPublisher.isConnected() && NetworkUtils.isNetworkAvailable((Application) getApplicationContext()))
                         Mqtt.connect(mPublisher, getString(R.string.mqtt_username), getString(R.string.mqtt_password));
 
-                    mBacklogHandler.postDelayed(this, mPublisher != null && mPublisher.isConnected() ? Mqtt.TIMEOUT : 60000);
+                    mBacklogHandler.postDelayed(this, mPublisher != null && mPublisher.isConnected() ? Mqtt.TIMEOUT : Mqtt.TIMEOUT * 2);
                 }
 
 

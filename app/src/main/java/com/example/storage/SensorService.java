@@ -45,6 +45,7 @@ import java.util.TimeZone;
 
 public class SensorService extends Service implements SensorEventListener {
     private static final Dataframe d = new Dataframe();
+    private final int WINDOW_SIZE = 2500;
     private PowerManager.WakeLock mWakeLock;
     private SlidingCalculator mCalculator;
     private SensorManager mSensorManager;
@@ -72,14 +73,14 @@ public class SensorService extends Service implements SensorEventListener {
         double dLat = lat2 - lat1;
         double a = Math.pow(Math.sin(dLat / 2), 2)
                 + Math.cos(lat1) * Math.cos(lat2)
-                * Math.pow(Math.sin(dLon / 2),2);
+                * Math.pow(Math.sin(dLon / 2), 2);
 
         double c = 2 * Math.asin(Math.sqrt(a));
         double r = 6371;
         double dist = c * r * 1000;
         double tDelta = (y.getTime() - x.getTime()) / 1000.0;
 
-        Measurements.sSpeed = (float) (dist/tDelta);
+        Measurements.sSpeed = (float) (dist / tDelta);
     }
 
     @Override
@@ -182,7 +183,7 @@ public class SensorService extends Service implements SensorEventListener {
         }
 
         mPrevLoc = null;
-        mCalculator = new SlidingCalculator(2500);
+        mCalculator = new SlidingCalculator(WINDOW_SIZE);
         Measurements.sCurrIdx = 0;
         Measurements.sFirstArray = true;
 
@@ -275,6 +276,7 @@ public class SensorService extends Service implements SensorEventListener {
     /**
      * Internal thread to offload z filtering from the listener
      */
+    @SuppressWarnings("CommentedOutCode")
     class MathThread extends Thread {
         public Looper looper;
         public Handler handler;
@@ -431,18 +433,18 @@ public class SensorService extends Service implements SensorEventListener {
                 }
 
                 float s = Measurements.sSpeed;
-                double edr = 0.0;
+                // double edr = 0.0;
                 double edr_rms = 0.0;
                 mCalculator.update(fz);
-                double std = mCalculator.getStd();
+                // double std = mCalculator.getStd();
                 double rms = mCalculator.getRms();
 
                 // For speed 0 or the initial batch of measurements we skip trying to estimate edr
-                if (mCalculator.getCount() > 100 && s > 0.0f) {
+                if (mCalculator.getCount() == WINDOW_SIZE && s > 0.0f) {
                     double speed = Math.pow(s, 2.0 / 3);
                     double I = 5.4;
                     double denominator = 0.7 * speed * I;
-                    edr = std / (Math.pow(denominator, 0.5));
+                    // edr = std / (Math.pow(denominator, 0.5));
                     edr_rms = rms / (Math.pow(denominator, 0.5));
                 }
 
@@ -468,8 +470,8 @@ public class SensorService extends Service implements SensorEventListener {
                 if (m != null) { // Immediate exit may clear the array
                     m.setZ(zAcc);
                     m.setFz(fz);
-                    m.setStd(std);
-                    m.setEdr(edr);
+                    // m.setStd(std);
+                    // m.setEdr(edr);
                     m.setRms(rms);
                     m.setEdrRms(edr_rms);
                     m.setTime(time);
