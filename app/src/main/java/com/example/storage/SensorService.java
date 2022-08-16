@@ -80,7 +80,7 @@ public class SensorService extends Service implements SensorEventListener {
         double dist = c * r * 1000;
         double tDelta = (y.getTime() - x.getTime()) / 1000.0;
 
-        Measurements.sSpeed = (float) (dist / tDelta);
+        Measurements.sSpeed = Math.abs((float) (dist / tDelta));
     }
 
     @Override
