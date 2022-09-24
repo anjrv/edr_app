@@ -98,7 +98,7 @@
         android:ems="10"
         android:inputType="textLongMessage"
         android:layout_marginTop="16dp"
-        android:digits="0123456789 qwertzuiopasdfghjklyxcvbnm"
+        android:digits="0123456789QWERTZUIOPASDFGHJKLYXCVBNMqwertzuiopasdfghjklyxcvbnm"
         app:layout_constraintStart_toEndOf="@id/session_label"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"

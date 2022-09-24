@@ -15,7 +15,10 @@ import info.mqtt.android.service.MqttAndroidClient;
 @SuppressWarnings("unused")
 public class Mqtt {
     // private static final String clientId = Build.BRAND + "_" + Build.ID;
-    public static final int TIMEOUT = 20000;
+
+    // Lower timeout for demo purposes, increase when done!
+    // public static final int TIMEOUT = 20000;
+    public static final int TIMEOUT = 3000;
 
     /**
      * Generate a new MQTT client
