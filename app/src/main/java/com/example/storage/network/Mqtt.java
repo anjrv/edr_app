@@ -18,7 +18,7 @@ public class Mqtt {
 
     // Lower timeout for demo purposes, increase when done!
     // public static final int TIMEOUT = 20000;
-    public static final int TIMEOUT = 3000;
+    public static final int TIMEOUT = 8000;
 
     /**
      * Generate a new MQTT client
