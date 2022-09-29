@@ -4,8 +4,8 @@
     <string name="connection_succeeded">Connection: ✔</string>
     <string name="stop_start">Measure:</string>
     <string name="mosquitto_url">Mosquitto:</string>
-    <!-- <string name="default_ip">31.209.145.132</string> -->
-    <string name="default_ip">130.208.171.79</string>
+    <string name="default_ip">31.209.145.132</string>
+    <!-- <string name="default_ip">130.208.171.79</string> -->
     <string name="session">Session:</string>
     <string name="date_and_time">Date and time:</string>
     <string name="latitude">Latitude:</string>

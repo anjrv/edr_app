@@ -441,7 +441,8 @@ public class SensorService extends Service implements SensorEventListener {
 
                 // For speed 0 or the initial batch of measurements we skip trying to estimate edr
                 if (mCalculator.getCount() == WINDOW_SIZE && s > 0.0f) {
-                    double speed = Math.pow(s, 2.0 / 3);
+                    // double speed = Math.pow(s, 2.0 / 3);
+                    double speed = Math.pow(40, 2.0 / 3);
                     double I = 5.4;
                     double denominator = 0.7 * speed * I;
                     // edr = std / (Math.pow(denominator, 0.5));
